@@ -1,0 +1,240 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+const int N=2e5+5;
+//二分图染色法
+int col[N];
+vector<int> e[N];
+bool flag=true;
+bool dfs(int u,int c){
+    col[u]=c;
+    for(int v:e[u]){
+        if(!col[v]){
+            if(!dfs(v,3-c)) return false;
+        }else if(col[v]==c) return false;
+    }
+    return true;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    memset(col,0,sizeof(col));
+    int n,m;cin>>n>>m;
+    for(int i=1;i<=m;i++){
+        int u,v;cin>>u>>v;
+        e[u].push_back(v);
+        e[v].push_back(u);
+    }
+    for(int i=1;i<=n;i++){
+        if(!col[i]){
+            if(!dfs(i,1)){
+                flag= false;
+                break;
+            }
+        }
+    }
+    if(!flag) puts("NO");
+    else puts("YES");
+    system("pause");
+    return 0;
+}
+
+
+
+
+//二分图最大匹配，匈牙利算法
+#define N 2010
+
+int n,m,e;
+int group[N][N],matched[N];
+bool vis[N];
+
+ bool found(int x){ //dfs找增广路 
+    for (int i = 1 ; i <= m ; i++)
+      if (group[x][i]){
+        if (vis[i]) 
+			continue;
+        vis[i] = 1;
+        if (!matched[i] || found(matched[i])) { 
+			matched[i] = x ; 
+			return true;
+		}
+      }
+    return false;
+}
+
+int match(){
+    int cnt = 0;//cnt是计数器 
+    memset(matched,0,sizeof(matched));
+    for (int i = 1 ; i <= n ; i++){
+      memset(vis,0,sizeof(vis));
+      if (found(i)) 
+	  	cnt++;	//找到了就加1 
+    }
+    return cnt;
+}
+//从这里向下看起 
+int main(){
+    cin>>n>>m>>e;//结点个数分别为n,m，边数为e
+    for (int i = 1 ; i <= e ; i++){
+      int x,y;
+      cin>>x>>y;
+      group[x][y] = 1;
+    }
+    //匈牙利算法，见上 
+   cout<<match()<<endl;
+    return 0;
+}
+
+
+
+
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define N 200005
+//二分图最大匹配算法Dinic算法
+//创建虚拟源点和汇点，将源点连上左边所有边，右边点连上汇点，容量皆为一，最大流及最大匹配
+struct edge{ll v,c,ne;}e[N];
+int h[N],idx=1;
+int d[N],cur[N];
+int S,T;
+void add(int u,int v,int c){
+    e[++idx]={v,c,h[u]};
+    h[u]=idx;
+}
+bool bfs(){
+    memset(d,0,sizeof(d));
+    queue<int> q;
+    q.push(S);d[S]=1;
+    while(!q.empty()){
+        int u=q.front();q.pop();
+        for(int i=h[u];i;i=e[i].ne){
+            int v=e[i].v;
+            if(d[v]==0&&e[i].c){
+                d[v]=d[u]+1;
+                q.push(v);
+                if(v==T) return true;
+            }
+        }
+    }
+    return false;
+}
+ll dfs(int u,ll mf){
+    if(u==T) return mf;
+    ll sum=0;
+    for(int i=cur[u];i;i=e[i].ne){
+        cur[u]=i;
+        int v=e[i].v;
+        if(d[v]==d[u]+1&&e[i].c){
+            ll f=dfs(v,min(mf,e[i].c));
+            e[i].c-=f;e[i^1].c+=f;
+            sum+=f;
+            mf-=f;
+            if(mf==0) break;
+        }
+    }
+    if(sum==0) d[u]=0;
+    return sum;
+}
+ll Dinic(){
+    ll flow=0;
+    while(bfs()){
+        memcpy(cur,h,sizeof(h));
+        flow+=dfs(S,1e9);
+    }
+    return flow;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n,m,k;cin>>n>>m>>k;
+    while(k--){
+        int u,v;cin>>u>>v;
+        add(u,v+n,1);add(v+n,u,0);
+    }
+    S=0,T=n+m+1;
+    for(int i=1;i<=n;i++){
+        add(S,i,1);add(i,S,0);
+    }
+    for(int i=1;i<=m;i++){
+        add(i+n,T,1);add(T,i+n,0);
+    }
+    cout<<Dinic()<<endl;
+    return 0;
+}
+
+
+
+
+
+
+const int MAXN = 305;
+const int INF = 0x3f3f3f3f;
+
+int w[MAXN][MAXN];   // 记录每个妹子和每个男生的好感度
+int la[MAXN];      // 每个妹子的期望值
+int lb[MAXN];       // 每个男生的期望值
+bool va[MAXN];    // 记录每一轮匹配匹配过的女生
+bool vb[MAXN];     // 记录每一轮匹配匹配过的男生
+int match[MAXN];        // 记录每个男生匹配到的妹子 如果没有则为-1
+int d[MAXN];        // 记录每个汉子如果能被妹子倾心最少还需要多少期望值
+
+int n;
+
+ll minn(ll a,ll b){return a>=b?b:a;}
+ll maxn(ll a,ll b){return a>=b?a:b;}
+bool dfs(int u){
+    va[u] = true;
+    for (int v = 1; v <= n; ++v) {
+        if (vb[v]) continue; // 每一轮匹配 每个男生只尝试一次
+        if (la[u] + lb[v] - w[u][v] == 0) {  // 如果符合要求
+            vb[v] = true;
+            if (match[v] == -1 || dfs(match[v] )) {    // 找到一个没有匹配的男生 或者该男生的妹子可以找到其他人
+                match[v] = u;
+                return true;
+            }
+        } else {
+            d[v] = minn(d[v],la[u] + lb[v] - w[u][v]);  // d 可以理解为该男生要得到女生的倾心 还需多少期望值 取最小值 备胎的样子【捂脸
+        }
+    }
+    return false;
+}
+
+int KM(){
+    memset(match, -1, sizeof match);
+    memset(lb, 0, sizeof lb);
+    //左顶标取i的出边的最大边权
+    for (int i = 1; i <= n; ++i) {
+        la[i] = w[i][1];
+        for (int j = 1; j <= n; ++j) {
+            la[i] = maxn(la[i], w[i][j]);
+        }
+    }
+    for (int i = 1; i <= n; ++i) {
+        fill(d+1, d + n+1, INF);    // 因为要取最小值 初始化为无穷大
+        while (true) {//直到左点i找到匹配
+            memset(va, false, sizeof va);
+            memset(vb, false, sizeof vb);
+            if (dfs(i)) break;  // 找到归宿 退出
+            // 如果不能找到 就降低期望值
+            // 最小可降低的期望值
+            int delta = INF;
+            for (int j = 1; j <= n; ++j)
+                if (!vb[j]) delta = minn(delta, d[j]);
+            for (int j = 1; j <= n; ++j) {
+                // 所有访问过的女生降低期望值
+                if (va[j]) la[j] -= delta;
+                // 所有访问过的男生增加期望值
+                if (vb[j]) lb[j] += delta;
+                // 没有访问过的boy 因为girl们的期望值降低，距离得到女生倾心又进了一步！
+                else d[j] -= delta;
+            }
+        }
+    }
+    // 匹配完成 求出所有配对的好感度的和
+    int res = 0;
+    for (int i = 1; i <= n; ++i)
+        res += w[match[i]][i];
+    return res;
+}

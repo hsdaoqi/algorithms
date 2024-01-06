@@ -1,0 +1,291 @@
+#include <bits/stdc++.h>
+using namespace std;
+//强连通分量tarjan算法
+//1.树边：访问节点走过的边。
+//2.返祖边：指向祖先节点的边 
+//3：横插边：右子树指向左子树的边 
+//4：前向边：指向子树节点的边 
+//
+const int N=5e5+5;
+vector<int> e[N];
+int dfn[N],low[N],tot=0;
+int stk[N],instk[N],top=0;
+int scc[N],siz[N],cnt=0; 
+//时间戳dfn[x]:节点x第一次被访问的顺序，追溯值low[x]：从节点x出发，所能访问到的最早时间戳 
+//stk[x]:将x入栈，instk[x]:记录x节点是否在栈中 
+//scc[x]记录x在哪个强连通块中，siz记录某个强连通分量块的大小
+
+void tarjan(int x){
+	//入x时，盖戳，入栈
+	dfn[x]=low[x]=++tot;
+	stk[++top]=x,instk[x]=1;
+	
+	for(int y:e[x]){
+		if(!dfn[y]){//若y尚未被访问 
+			tarjan(y);
+			low[x]=min(low[x],low[y]);//回x时更新low 
+		}else if(instk[y]){//若y已被访问且已在栈中 
+			low[x]=min(low[x],dfn[y]);//更新low 
+		}
+		//还有一种已被访问但不在栈中，此情况不做处理 
+	}
+	
+	//离x时，记录scc
+	if(dfn[x]==low[x]){
+		int y;++cnt;
+		do{
+			y=stk[top--];instk[y]=0;
+			scc[y]=cnt;//scc编号
+			++siz[cnt];//scc大小 
+		}while(y!=x);
+	} 
+} 
+ 
+//tarjan缩点，主函数主要针对洛谷3387
+#include <bits/stdc++.h>
+using namespace std;
+const int N=5e5+5;
+
+vector<int> e[N],din[N];
+int dfn[N],low[N],tot=0,stk[N],instk[N],top=0,scc[N],siz[N],cnt=0;
+int in[N],w[N],dp[N];
+void tarjan(int x){
+	dfn[x]=low[x]=++tot;
+	stk[++top]=x;instk[x]=1;
+	
+	for(int y:e[x]){
+		if(!dfn[y]){
+			tarjan(y);
+			low[x]=min(low[x],low[y]);
+		}else if(instk[y]){
+			low[x]=min(low[x],dfn[y]);
+		}
+	} 
+	
+	if(dfn[x]==low[x]){
+		int y;++cnt;
+		do{
+			y=stk[top--];
+			instk[y]=0;
+			scc[y]=cnt;
+			siz[cnt]+=w[y];
+		}while(y!=x);
+	}
+}
+
+int main(){
+	ios::sync_with_stdio(false);
+	cin.tie(0);
+	int n,m;cin>>n>>m;
+	for(int i=1;i<=n;i++) cin>>w[i];
+	for(int i=1;i<=m;i++){
+		int a,b;cin>>a>>b;
+		e[a].push_back(b);
+	}
+	for(int i=1;i<=n;i++){
+		if(!dfn[i]) tarjan(i);
+	}
+	for(int i=1;i<=n;i++){
+		for(int y:e[i]){
+			if(scc[y]!=scc[i]){
+				din[scc[i]].push_back(scc[y]);
+				in[scc[y]]++;
+			}
+		}
+	}
+	for(int i=cnt;i>=1;i--){
+		if(dp[i]==0){
+			dp[i]=siz[i];
+		}
+		for(int y:din[i]){
+			dp[y]=max(dp[y],dp[i]+siz[y]);
+		}
+	}
+	int ans=0;
+	for(int i=1;i<=cnt;i++){
+		ans=max(ans,dp[i]);
+	}
+	cout<<ans<<endl;
+}
+
+
+
+#include <bits/stdc++.h>
+using namespace std;
+const int N=5e5+5;
+
+//tarjan算法求割点
+//割点：对于一个无向图，如果把一个点删除后，联通块的个数增加了，那么这个点就是割点
+//割点判定法则：
+//1.如果x不是根节点，当搜索树上存在x的一个子节点y，满足low[y]>=dfn[x],那么x就是割点
+//2.如果x是根节点，当搜索树上存在至少两个子节点y1,y2,满足上述条件，那么x就是割点 
+vector<int> e[N];
+int dfn[N],low[N],tot;
+int cut[N],root;
+void tarjan(int x){
+	//入时，盖戳 
+	dfn[x]=low[x]=++tot;
+	
+	int child=0;
+	for(int y:e[x]){
+		if(!dfn[y]){
+			tarjan(y);
+			//回x时，更新low，判割点
+			low[x]=min(low[x],low[y]);
+			if(low[y]>=dfn[x]){
+				child++;//子树个数 
+				if(x!=root||child>1){
+					cut[x]=true;
+				} 
+			} 
+		}else{//若y已经访问过 
+			low[x]=min(low[x],dfn[y]); 
+		}
+	}
+} 
+
+int main(){
+	ios::sync_with_stdio(false);
+	cin.tie(0);
+	int n,m;cin>>n>>m;
+	for(int i=1;i<=m;i++){
+		int u,v;cin>>u>>v;
+		e[u].push_back(v);
+		e[v].push_back(u);
+	}
+	for(int i=1;i<=n;i++){
+		if(!dfn[i]) root=i,tarjan(i);
+	}
+	int ans=0;
+	vector<int> res;
+	for(int i=1;i<=n;i++){
+		if(cut[i]){
+			ans++;
+			res.push_back(i);
+		}
+	}
+	cout<<ans<<endl;
+	for(int x:res){
+		cout<<x<<" ";
+	}
+	return 0;
+} 
+
+
+
+#include <bits/stdc++.h>
+using namespace std;
+//tarjan算法求割边(桥)
+//割边：对于一个无向图，如果删除一条边后图中的连通块个数增加了，则称这条边为桥或者割边
+//割边判定法则：当搜索树上存在x的一个子结点y，满足low[y]>dfn[x],则(x,y)这条边就是割边
+const int N=5e5+5;
+struct edge{int u,v;};
+vector<edge> e;//边集
+vector<int>h[N];//出边
+int dfn[N],low[N],tot,cnt;
+struct bridge{int x,y;}bri[N];
+void add(int a,int b){
+    e.push_back({a,b});
+    h[a].push_back(e.size()-1);
+}
+void tarjan(int x,int in_edg){
+    dfn[x]=low[x]=++tot;
+
+    for(int i=0;i<h[x].size();i++){
+        int j=h[x][i],y=e[j].v;
+        if(!dfn[y]){//若y尚未访问
+            tarjan(y,j);
+            low[x]=min(low[x],low[y]);
+            if(low[y]>dfn[x]){
+                bri[++cnt]={x,y};
+            }
+        }else if(j!=(in_edg^1)){//不是反边
+            low[x]=min(low[x],dfn[y]);
+        }
+    }
+}
+int main(){
+    ios::sync_with_stdio(false);cin.tie(nullptr);
+    int n,m;cin>>n>>m;
+    for(int i=1;i<=m;i++){
+        int a,b;cin>>a>>b;
+        add(a,b);add(b,a);
+    }
+    tarjan(1,0);
+    sort(bri+1,bri+cnt+1,[&](bridge x,bridge y){
+        return x.x==y.x?x.y<y.y:x.x<y.x;
+    });
+    for(int i=1;i<=cnt;i++){
+        cout<<bri[i].x<<" "<<bri[i].y<<endl;
+    }
+    system("pause");
+    return 0;
+
+}
+ 
+
+
+#include <iostream>
+#include <stack>
+using namespace std;
+//边双连通分量
+//无向图中极大的不包含割边的连通块被称为“边双连通分量”
+//eDCC->缩点，将双连通分量缩为一个点，缩完点后得到的图一定是一棵树(或森林)，树边就是原来的割边
+const int N=5E5+5;
+struct edge{int v,ne;}e[N];
+int h[N],idx=1;//从2,3开始配色
+int dfn[N],low[N],tot;
+stack<int> stk;
+int dcc[N],cnt;
+int bri[N],d[N];
+void add(int a,int b){
+    e[++idx].v=b;e[idx].ne=h[a];
+    h[a]=idx;
+}
+
+void tarjan(int x,int in_edg) {
+    dfn[x] = low[x] = ++tot;
+    stk.push(x);
+    for (int i = h[x]; i; i = e[i].ne) {
+        int y = e[i].v;
+        if (!dfn[y]) {
+            tarjan(y, i);
+            low[x] = min(low[x], low[y]);
+            if (low[y] > dfn[x]) {
+                bri[i] = bri[i ^ 1] = true;
+            }
+        } else if (i != (in_edg ^ 1)) {
+            low[x] = min(low[x], dfn[y]);
+        }
+    }
+    if (dfn[x] == low[x]) {
+        ++cnt;
+        while (1) {
+            int y = stk.top();
+            stk.pop();
+            dcc[y] = cnt;
+            if (y == x)break;
+        }
+    }
+}
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int n,m;
+    cin>>n>>m;
+    while(m--){
+        int a,b;cin>>a>>b;
+        add(a,b);add(b,a);
+    }
+    tarjan(1,0);
+    for(int i=2;i<=idx;i++){
+        if(bri[i]) d[dcc[e[i].v]]++;
+    }
+    int sum=0;
+    for(int i=1;i<=cnt;i++){
+        if(d[i]==1) sum++;
+    }
+    cout<<(sum+1)/2<<endl;
+    return 0;
+}

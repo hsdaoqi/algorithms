@@ -1,0 +1,34 @@
+const int N=2010000;
+int c[N],x[N],y[N],sa[N],rk[N],height[N],n,m;
+char s[N];
+void get_sa(){
+    for(int i=1;i<=n;i++)c[x[i]=s[i]]++;
+    for(int i=1;i<=m;i++)c[i]+=c[i-1];
+    for(int i=n;i>=1;i--)sa[c[x[i]]--]=i;
+    for(int k=1;k<=n;k<<=1){
+        int num=0;
+        for(int i=n;i>=n-k+1;i--)y[++num]=i;//y[]第二关键字排名为num的第一关键字位置。
+        for(int i=1;i<=n;i++)if(sa[i]>k)y[++num]=sa[i]-k;
+        for(int i=1;i<=m;i++)c[i]=0;
+        for(int i=1;i<=n;i++)c[x[i]]++;
+        for(int i=1;i<=m;i++)c[i]+=c[i-1];
+        for(int i=n;i>=1;i--)sa[c[x[y[i]]]--]=y[i],y[i]=0;//第一第二关键字的基数排序
+        swap(x,y);
+        num=0;
+        for(int i=1;i<=n;i++)
+            x[sa[i]]=(y[sa[i]]==y[sa[i-1]]&&y[sa[i]+k]==y[sa[i-1]+k])?num:++num;
+        if(n==num)break;
+        m=num;
+    }
+}
+void get_height(){
+    for(int i=1;i<=n;i++)rk[sa[i]]=i;
+    int k=0;
+    for(int i=1;i<=n;i++){//i是原串的下标
+        if(rk[i]==1)continue;
+        if(k)k--;//height[rk[i]]>=height[rk[i-1]]-1
+        int j=sa[rk[i]-1];
+        while(s[i+k]==s[j+k]&&i+k<=n&&j+k<=n)k++;
+        height[rk[i]]=k;//height的下标是排名
+    }
+}

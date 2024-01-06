@@ -1,0 +1,19 @@
+// 重载输入运算符以支持__int128类型
+std::istream& operator>>(std::istream& is, __int128& n) {
+    std::string str;is >> str;
+    n=0;
+    for(int i=0;i<str.size();i++){
+        n = n*10+str[i]-'0';
+    }
+    return is;
+}
+//载输出运算符以支持__int128类型
+std::ostream &operator<<(std::ostream &os, __int128 n) {
+    std::string s;
+    while (n) {
+        s += '0' + n % 10;
+        n /= 10;
+    }
+    std::reverse(s.begin(), s.end());
+    return os << s;
+}

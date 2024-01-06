@@ -1,0 +1,205 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+//网络流
+//最大流EK算法
+const int N=5e5+5;
+struct edge{ll v,c ,ne;}e[N];
+int h[N],idx=1;//从2，3开始配对
+ll mf[N],pre[N];
+int S,T;
+void add(int a,int b,int c){
+    e[++idx]={b,c,h[a]};
+    h[a]=idx;
+}
+bool bfs(){//找增广路
+    memset(mf,0,sizeof(mf));
+    queue<int> q;
+    q.push(S);mf[S]=1e9;
+    while(!q.empty()){
+        int u=q.front();q.pop();
+        for(int i=h[u];i;i=e[i].ne){
+            ll v=e[i].v;
+            if(mf[v]==0&&e[i].c){
+                mf[v]=min(mf[u],e[i].c);
+                pre[v]=i;//存前驱边
+                q.push(v);
+                if(v==T) return true;
+            }
+        }
+    }
+    return false;
+}
+
+ll EK(){//累加可行流
+    ll flow=0;
+    while(bfs()){
+        int v=T;
+        while(v!=S){//更新残留网
+            int i=pre[v];
+            e[i].c-=mf[T];
+            e[i^1].c+=mf[T];
+            v=e[i^1].v;
+        }
+        flow+=mf[T];
+    }
+    return flow;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int n,m;scanf("%d%d%d%d",&n,&m,&S,&T);
+    while(m--){
+        int u,v,w;scanf("%d%d%d",&u,&v,&w);
+        add(u,v,w);
+        add(v,u,0);
+    }
+    cout<<EK()<<endl;
+    system("pause");
+    return 0;
+}
+
+
+
+
+const int N=5e4+5;
+//最大流：Dinic算法
+struct edge{ll v,c,ne;}e[N];
+int h[N],idx=1;//从2，3开始匹配
+int d[N],cur[N];//d[u]:存u点所在的图层，cur[u]:存u点的当前出边
+int S,T;//源点，终点
+void add(int a,int b,int c){
+    e[++idx]={b,c,h[a]};
+    h[a]=idx;
+}
+bool bfs(){//对点分层，找增广路
+    memset(d,0,sizeof(d));
+    queue<int> q;
+    q.push(S);d[S]=1;
+    while(!q.empty()){
+        int u=q.front();q.pop();
+        for(int i=h[u];i;i=e[i].ne){
+            int v=e[i].v;
+            if(d[v]==0&&e[i].c){
+                d[v]=d[u]+1;
+                q.push(v);
+                if(v==T) return true;
+            }
+        }
+    }
+    return false;
+}
+
+ll dfs(int u,ll mf){//多路增广
+    if(u==T) return mf;
+    ll sum=0;
+    for(int i=cur[u];i;i=e[i].ne){
+        cur[u]=i;//当前弧优化
+        int v=e[i].v;
+        if(d[v]==d[u]+1&&e[i].c){
+            ll f = dfs(v,min(mf,e[i].c));
+            e[i].c-=f;e[i^1].c+=f;//更新残留网
+            sum+=f;//更新u的流出流量
+            mf-=f;//减少u的剩余流量
+            if(mf==0) break;//余量优化
+        }
+    }
+    if(sum==0) d[u]=0;//残枝优化
+    return sum;
+}
+ll Dinic(){//累加可行流
+    ll flow=0;
+    while(bfs()){
+        memcpy(cur,h,sizeof(h));
+        flow+=dfs(S,1e9);
+    }
+    return flow;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int n,m;cin>>n>>m>>S>>T;
+    while(m--){
+        int u,v,w;cin>>u>>v>>w;
+        add(u,v,w);add(v,u,0);
+    }
+    cout<<Dinic()<<endl;
+
+    cout<<Dinic()<<" ";//最大流即最小割
+    idx=1;
+    memset(h,0,sizeof(h));
+    for(int i=1;i<=m;i++){//将容量变为一，所求最大流即位最小割最少边数
+        add(a[i],b[i],1);
+        add(b[i],a[i],0);
+    }
+    cout<<Dinic()<<endl;
+    system("pause");
+    return 0;
+}
+
+
+
+
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+const int N=2e5+5;
+//费用流：
+//给定一个网络G,每条边有容量限制c(u,v),还有单位流量的费用w(u,v).
+//当（u，v）的流量为f（u，v）时，需要花费f(u,v)*w(u,v)的费用，该网络中总花费最小的最大流称为最小费用最大流，总花费
+//最大的最大流称为最大费用最大流
+struct edge{ll v,c,w,ne;}e[N];
+int h[N],idx=1;
+int d[N],mf[N],pre[N],vis[N];
+int flow,cost;
+int S,T;
+void add(int u,int v,int c,int w){
+    e[++idx]={v,c,w,h[u]};
+    h[u]=idx;
+}
+bool spfa(){//寻找最短路的增广路
+    memset(d,0x3f,sizeof(d));
+    memset(mf,0,sizeof(mf));
+    queue<int> q;q.push(S);
+    d[S]=0,mf[S]=INT_MAX,vis[S]=1;
+    while(!q.empty()){
+        int u=q.front();q.pop();vis[u]=0;
+        for(int i=h[u];i;i=e[i].ne){
+            int v=e[i].v,c=e[i].c,w=e[i].w;
+            if(d[v]>d[u]+w&&c){
+                d[v]=d[u]+w;//最短路
+                mf[v]=min(mf[u],c);
+                pre[v]=i;//前驱边
+                if(!vis[v]){
+                    q.push(v);vis[v]=1;
+                }
+            }
+        }
+    }
+    return mf[T]>0;
+}
+void EK(){
+    while(spfa()){
+        for(int v=T;v!=S;){
+            int i=pre[v];
+            e[i].c-=mf[T];
+            e[i^1].c+=mf[T];//更新残留网
+            v=e[i^1].v;
+        }
+        flow+=mf[T];//累加可行流
+        cost+=mf[T]*d[T];//累加费用
+    }
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int n,m;cin>>n>>m>>S>>T;
+    for(int i=1;i<=m;i++){
+        int u,v,c,w;cin>>u>>v>>c>>w;
+        add(u,v,c,w);add(v,u,0,-w);
+    }
+    EK();
+    cout<<flow<<" "<<cost<<endl;
+    system("pause");
+    return 0;
+}
