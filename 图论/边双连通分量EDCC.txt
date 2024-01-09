@@ -1,0 +1,59 @@
+//无向图中极大的不包含割边的连通块被称为边双联通分量
+
+struct EDCC{
+    int n;
+    vector<vector<pair<int,int>>> adj;
+    vector<vector<int>> ndcc;
+    vector<pair<int,int>> bri;
+    vector<int> dfn,low,stk,dcc;
+    int cnt,cur,idx;
+    EDCC(){};
+    EDCC(int _n):n(_n){
+        Init(_n);
+    }
+    void Init(int _n){
+        adj.assign(_n,{});
+        ndcc.assign(_n,{});
+        dfn.resize(_n);
+        low.resize(_n);
+        dcc.resize(_n);
+        cnt=cur=0;
+    }
+    void addEdge(int u,int v){
+        idx++;
+        adj[u].push_back({v,idx});
+        adj[v].push_back({u,idx});
+    }
+    void dfs(int x,int fid){
+        dfn[x]=low[x]=++cur;
+        stk.push_back(x);
+        for(auto [y,id]:adj[x]){
+            if(dfn[y]==0){
+                dfs(y,id);
+                low[x]=min(low[x],low[y]);
+                if(low[y]>dfn[x]){
+                    bri.emplace_back(x,y);
+                }
+            }else if(id!=fid){
+                low[x]=min(low[x],dfn[y]);
+            }
+        }
+
+        if(dfn[x]==low[x]){
+            ++cnt;int y;
+            do{
+                y=stk.back();
+                stk.pop_back();
+                dcc[y]=cnt;
+                ndcc[cnt].push_back(y);
+            }while(y!=x);
+        }
+    }
+    void work(){
+        for(int i=1;i<n;i++){
+            if(!dfn[i]){
+                dfs(i,i);
+            }
+        }
+    }
+};
