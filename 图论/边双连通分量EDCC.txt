@@ -5,7 +5,7 @@ struct EDCC{
     vector<vector<pair<int,int>>> adj;
     vector<vector<int>> ndcc;
     vector<pair<int,int>> bri;
-    vector<int> dfn,low,stk,dcc;
+    vector<int> dfn,low,stk,bel;
     int cnt,cur,idx;
     EDCC(){};
     EDCC(int _n):n(_n){
@@ -16,7 +16,7 @@ struct EDCC{
         ndcc.assign(_n,{});
         dfn.resize(_n);
         low.resize(_n);
-        dcc.resize(_n);
+        bel.resize(_n);
         cnt=cur=0;
     }
     void addEdge(int u,int v){
@@ -44,7 +44,7 @@ struct EDCC{
             do{
                 y=stk.back();
                 stk.pop_back();
-                dcc[y]=cnt;
+                bel[y]=cnt;
                 ndcc[cnt].push_back(y);
             }while(y!=x);
         }
