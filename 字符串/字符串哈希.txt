@@ -1,0 +1,29 @@
+using ull = unsigned long long;
+struct Hash{
+    int n;
+    ull p1=131,p2=13331;
+    vector<ull> P1,P2,h1,h2;
+    Hash(){};
+    Hash(string s){
+        Init(s);
+    }
+    void Init(string s){
+        n=s.size();
+        P1.resize(n+1);
+        P2.resize(n+1);
+        h1.resize(n+1);
+        h2.resize(n+1);
+        P1[0]=1;P2[0]=1;
+        for(int i=1;i<=n;i++){
+            P1[i]=P1[i-1]*p1;
+            h1[i]=h1[i-1]*p1+s[i-1];
+            P2[i]=P2[i-1]*p2;
+            h2[i]=h2[i-1]*p2+s[i-1];
+        }
+    }
+    pair<ull,ull> get(int l,int r){
+        ull t1=h1[r]-h1[l-1]*P1[r-l+1];
+        ull t2=h2[r]-h2[l-1]*P2[r-l+1];
+        return {t1,t2};
+    }
+};
