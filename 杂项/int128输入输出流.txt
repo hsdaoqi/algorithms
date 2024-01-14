@@ -2,9 +2,11 @@
 std::istream& operator>>(std::istream& is, __int128& n) {
     std::string str;is >> str;
     n=0;
-    for(int i=0;i<str.size();i++){
+    int st=(str[0]=='-');
+    for(int i=st;i<str.size();i++){
         n = n*10+str[i]-'0';
     }
+    if(st==1) n*=-1;
     return is;
 }
 //载输出运算符以支持__int128类型
