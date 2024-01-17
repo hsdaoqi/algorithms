@@ -1,0 +1,18 @@
+bool stain(vector<vector<int>> &adj){
+    vector<int> col(adj.size(),-1);
+    function<bool(int,int)> dfs=[&](int u,int c)->bool{
+        col[u]=c;
+        for(int v:adj[u]){
+            if(col[v]==-1){
+                if(!dfs(v,c^1)) return false;
+            }else if(col[v]==c) return false;
+        }
+        return true;
+    };
+    for(int i=1;i<col.size();i++){
+        if(col[i]==-1){
+            if(!dfs(i,1)) return false;
+        }
+    }
+    return true;
+}
