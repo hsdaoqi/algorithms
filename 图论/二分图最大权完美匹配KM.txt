@@ -1,3 +1,5 @@
+//求解最小权：边权取反
+
 template<class T>
 struct KM{
     int n,inf;

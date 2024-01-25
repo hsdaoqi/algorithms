@@ -1,0 +1,80 @@
+template<class T>
+struct SegTree {
+    int n;
+    struct Node {
+        int l, r;
+        T sum, tag;
+    };
+    vector<Node> tr;
+    SegTree(){};
+    SegTree(int _n,T _v=T()){
+        init(_n,_v);
+    }
+    SegTree(vector<T> &v){
+        init(v);
+    }
+    void pushup(int x) {
+        tr[x].sum = tr[x << 1].sum + tr[x << 1 | 1].sum;
+    }
+    void init(int _n,T _v=T()){
+        init(vector<T>(_n,_v));
+    }
+    void init(vector<T> _init){
+        this->n= _init.size()-1;
+        tr.resize((n+1)<<2);
+        function<void(int,int,int)> build=[&](int x,int l,int r){
+            tr[x] = {l, r, 0, 0};
+            if (l == r) {
+                tr[x].sum = _init[l];
+                return;
+            }
+            int mid = (l + r) >> 1;
+            build(x << 1, l, mid);
+            build(x << 1 | 1, mid + 1, r);
+            pushup(x);
+        };
+        build(1,1,n);
+    }
+
+    void pushdown(int x) {
+        if (tr[x].tag) {
+            tr[x << 1].sum += (tr[x << 1].r - tr[x << 1].l + 1) * tr[x].tag;
+            tr[x << 1 | 1].sum += (tr[x << 1 | 1].r - tr[x << 1 | 1].l + 1) * tr[x].tag;
+            tr[x << 1].tag += tr[x].tag;
+            tr[x << 1 | 1].tag += tr[x].tag;
+            tr[x].tag = 0;
+        }
+    }
+
+    void update(int x, int ql, int qr, T v) {
+        if (ql <= tr[x].l && qr >= tr[x].r) {
+            tr[x].tag += v;
+            tr[x].sum += (tr[x].r - tr[x].l + 1) * v;
+            return;
+        }
+        int mid = (tr[x].l + tr[x].r) >> 1;
+        pushdown(x);
+        if (ql <= mid) update(x << 1, ql, qr, v);
+        if (qr > mid) update(x << 1 | 1, ql, qr, v);
+        pushup(x);
+    }
+
+    T query(int x, int ql, int qr) {
+        if (ql <= tr[x].l && qr >= tr[x].r) {
+            return tr[x].sum;
+        }
+        int mid = (tr[x].r + tr[x].l) >> 1;
+        T ans = 0;
+        pushdown(x);
+        if (ql <= mid) ans += query(x << 1, ql, qr);
+        if (qr > mid) ans += query(x << 1 | 1, ql, qr);
+        pushup(x);
+        return ans;
+    }
+    T rangeQuery(int ql,int qr){
+        return query(1,ql,qr);
+    }
+    void rangeUpdate(int ql,int qr,T v){
+        update(1,ql,qr,v);
+    }
+};

@@ -5,11 +5,11 @@ struct HLD {
     int cur;
 
     HLD() {}
-    HLD(int n) {
-        init(n);
+    HLD(int _n) {
+        init(_n);
     }
-    void init(int n) {//初始化
-        this->n = n;
+    void init(int _n) {//初始化
+        this->n = _n;
         siz.resize(n);//子树大小
         top.resize(n);//重链的顶端
         dep.resize(n);//深度
@@ -24,7 +24,7 @@ struct HLD {
         adj[u].push_back(v);
         adj[v].push_back(u);
     }
-    void work(int root = 0) {
+    void work(int root = 1) {
         top[root] = root;
         dep[root] = 0;
         parent[root] = -1;
@@ -47,7 +47,7 @@ struct HLD {
         }
     }
     void dfs2(int u) {
-        in[u] = cur++;
+        in[u] = ++cur;
         seq[in[u]] = u;
         for (auto v : adj[u]) {
             top[v] = v == adj[u][0] ? top[u] : v;
