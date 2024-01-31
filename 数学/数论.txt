@@ -74,18 +74,6 @@ int gcd(int a,int b){
 //最小公倍数
 ans=(a*b)/gcd(a,b);
 
-//扩展欧几里得算法
-//求出a*x+b*y=gcd(a,b)式子中，满足条件的x与y,同时求出gcd(a,b);
-int exgcd(int a,int b,int &x,int &y){
-    if(b==0){
-        x=1,y=0;
-        return a;
-    }
-
-    int gcd=exgcd(b,a%b,y,x);
-    y-=(a/b)*x;
-    return gcd;
-}
 
 //求逆元，所谓逆元就是(a/b)%p==x,找出一个数使得（a*b')%p==x,那么b'就是b的逆元，并且(b*b')%p是恒等于1的
 //求逆元1
@@ -312,44 +300,6 @@ void get_mu(int n){
         }
     }
 }
-
-
-//扩展BSGS算法
-//求a^x=b(mod p)的最小非负整数x
-ll exbsgs(ll a,ll b,ll p){
-    a%=p;b%=p;
-    if(b==0||p==0) return 0;
-    ll d,k=0,A=1;
-    while(true){//为了用BSGS算法，要使a，p互质
-        d=__gcd(a,p);
-        if(d==1) break;
-        if(b%d) return -1;//根据裴蜀定理，无解
-        k++;b/=d;p/=d;
-        A=A*(a/d)%p;
-        if(A==b) return k;
-    }
-    ll m=ceil(sqrt(p));
-    ll t=b;
-    unordered_map<int,int> hash;
-    hash[b]=0;
-    for(int j=1;j<m;j++){
-        t=t*a%p;//求b*a^j
-        hash[t]=j;
-    }
-    ll mi=1;
-    for(int i=1;i<=m;i++){
-        mi=mi*a%p;//求a^m
-    }
-    t=A;
-    for(int i=1;i<=m;i++){
-        t=t*mi%p;//求(a^m)^j
-        if(hash.count(t)){
-            return i*m-hash[t]+k;
-        }
-    }
-    return -1;//无解
-}
-
 
 
 //高斯消元法

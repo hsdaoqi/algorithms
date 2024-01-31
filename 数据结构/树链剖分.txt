@@ -1,3 +1,7 @@
+//点权转转边权
+	1.在进行 DFS 遍历时即将进入子节点时将边权赋给子节点 A[v]=e[i].w
+	2.在进行路径更新的时候最后一步在 LCA 上减去 k,因为 LCA 代表的边权并不在所更新路径中  Update(1,N,id[lca],id[lca],−k)
+	3.在进行路径查询的时候最后也会把多查询的 LCA 代表的边权减掉 ans−=Query(1,N,id[lca],id[lca])
 struct HLD {
     int n;
     std::vector<int> siz, top, dep, parent, in, out, seq;

@@ -14,7 +14,7 @@ std::ostream &operator<<(std::ostream &os, __int128 n) {
     std::string s;
     if(n==0) s="0";
     bool flag=false;
-    if(n<0) n=abs(n),flag=true;
+    if(n<0) flag=true,n=-n;
     while (n) {
         s += '0' + n % 10;
         n /= 10;
