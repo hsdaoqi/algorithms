@@ -1,80 +1,77 @@
-template<class T>
-struct SegTree {
+template<class Info>
+struct SegmentTree {
     int n;
-    struct Node {
-        int l, r;
-        T sum, tag;
-    };
-    vector<Node> tr;
-    SegTree(){};
-    SegTree(int _n,T _v=T()){
-        init(_n,_v);
+    std::vector<Info> info;
+    SegmentTree() : n(0) {}
+    SegmentTree(int n_, Info v_ = Info()) {
+        init(n_, v_);
     }
-    SegTree(vector<T> &v){
-        init(v);
+    template<class T>
+    SegmentTree(std::vector<T> init_) {
+        init(init_);
     }
-    void pushup(int x) {
-        tr[x].sum = tr[x << 1].sum + tr[x << 1 | 1].sum;
+    void init(int n_, Info v_ = Info()) {
+        init(std::vector(n_, v_));
     }
-    void init(int _n,T _v=T()){
-        init(vector<T>(_n,_v));
-    }
-    void init(vector<T> _init){
-        this->n= _init.size()-1;
-        tr.resize((n+1)<<2);
-        function<void(int,int,int)> build=[&](int x,int l,int r){
-            tr[x] = {l, r, 0, 0};
-            if (l == r) {
-                tr[x].sum = _init[l];
+    template<class T>
+    void init(std::vector<T> init_) {
+        n = init_.size()-1;
+        info.assign(4 << std::__lg(n), Info());
+        std::function<void(int, int, int)> build = [&](int p, int l, int r) {
+            if (r == l) {
+                info[p] = init_[l];
                 return;
             }
-            int mid = (l + r) >> 1;
-            build(x << 1, l, mid);
-            build(x << 1 | 1, mid + 1, r);
-            pushup(x);
+            int m = (l + r) / 2;
+            build(2 * p, l, m);
+            build(2 * p + 1, m+1, r);
+            pull(p);
         };
-        build(1,1,n);
+        build(1, 1, n);
     }
-
-    void pushdown(int x) {
-        if (tr[x].tag) {
-            tr[x << 1].sum += (tr[x << 1].r - tr[x << 1].l + 1) * tr[x].tag;
-            tr[x << 1 | 1].sum += (tr[x << 1 | 1].r - tr[x << 1 | 1].l + 1) * tr[x].tag;
-            tr[x << 1].tag += tr[x].tag;
-            tr[x << 1 | 1].tag += tr[x].tag;
-            tr[x].tag = 0;
-        }
+    void pull(int p) {
+        info[p] = info[2 * p] + info[2 * p + 1];
     }
-
-    void update(int x, int ql, int qr, T v) {
-        if (ql <= tr[x].l && qr >= tr[x].r) {
-            tr[x].tag += v;
-            tr[x].sum += (tr[x].r - tr[x].l + 1) * v;
+    void modify(int p, int l, int r, int x, const Info &v) {
+        if (r ==l) {
+            info[p] = v;
             return;
         }
-        int mid = (tr[x].l + tr[x].r) >> 1;
-        pushdown(x);
-        if (ql <= mid) update(x << 1, ql, qr, v);
-        if (qr > mid) update(x << 1 | 1, ql, qr, v);
-        pushup(x);
-    }
-
-    T query(int x, int ql, int qr) {
-        if (ql <= tr[x].l && qr >= tr[x].r) {
-            return tr[x].sum;
+        int m = (l + r) / 2;
+        if (x <= m) {
+            modify(2 * p, l, m, x, v);
+        } else {
+            modify(2 * p + 1, m+1, r, x, v);
         }
-        int mid = (tr[x].r + tr[x].l) >> 1;
-        T ans = 0;
-        pushdown(x);
-        if (ql <= mid) ans += query(x << 1, ql, qr);
-        if (qr > mid) ans += query(x << 1 | 1, ql, qr);
-        pushup(x);
-        return ans;
+        pull(p);
     }
-    T rangeQuery(int ql,int qr){
-        return query(1,ql,qr);
+    void modify(int p, const Info &v) {
+        modify(1, 1, n, p, v);
     }
-    void rangeUpdate(int ql,int qr,T v){
-        update(1,ql,qr,v);
+    Info rangeQuery(int p, int l, int r, int x, int y) {
+        if(l>y||r<x){
+            return Info();
+        }
+        if (l >= x && r <= y) {
+            return info[p];
+        }
+        int m = (l + r) / 2;
+        return rangeQuery(2 * p, l, m, x, y) + rangeQuery(2 * p + 1, m+1, r, x, y);
+    }
+    Info rangeQuery(int l, int r) {
+        return rangeQuery(1, 1, n, l, r);
     }
 };
+constexpr int inf = 2000;
+struct Info {
+    int pre, suf, sum, res;
+    Info(int s = -inf): pre(s), suf(s), sum(s), res(s) {}
+};
+Info operator+(Info a, Info b) {
+    Info c;
+    c.sum = a.sum + b.sum;
+    c.pre = std::max(a.pre, a.sum + b.pre);
+    c.suf = std::max(b.suf, a.suf + b.sum);
+    c.res = std::max({a.res, b.res, a.suf + b.pre});
+    return c;
+}

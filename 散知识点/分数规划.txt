@@ -1,0 +1,37 @@
+分数规划用来求一个分式的极值。
+形象一点就是，给出 a_i 和 b_i，求一组 w_i\in\{0,1\}，最小化或最大化
+另外一种描述：每种物品有两个权值 a 和 b，选出若干个物品使得   suma/sumb  最小/最大。
+
+
+
+分数规划问题的通用方法是二分。
+
+假设我们要求最大值。二分一个答案 mid，然后推式子（为了方便少写了上下界）：
+ sum  ai * wi
+---------------  >mid ==> sum ai *wi - mid *sum bi * wi>0 ==> sum wi*(ai-mid*bi) >0 
+ sum  bi  *wi
+
+那么只要求出不等号左边的式子的最大值就行了。如果最大值比 0 要大，说明 mid 是可行的，否则不可行。
+
+
+bool check(double mid) {
+  double s = 0;
+  for (int i = 1; i <= n; ++i)
+    if (a[i] - mid * b[i] > 0)  // 如果权值大于 0
+      s += a[i] - mid * b[i];   // 选这个物品
+  return s > 0;
+}
+n = read();
+  for (int i = 1; i <= n; ++i) a[i] = read();
+  for (int i = 1; i <= n; ++i) b[i] = read();
+  // 二分
+  double L = 0, R = 1e9;
+  while (R - L > eps) {
+    double mid = (L + R) / 2;
+    if (check(mid))  // mid 可行，答案比 mid 大
+      L = mid;
+    else  // mid 不可行，答案比 mid 小
+      R = mid;
+  }
+  // 输出
+  printf("%.6lf\n", L);

@@ -1,3 +1,4 @@
+using i128=__int128;
 // 重载输入运算符以支持__int128类型
 std::istream& operator>>(std::istream& is, __int128& n) {
     std::string str;is >> str;

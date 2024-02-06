@@ -1,3 +1,4 @@
+    vector<array<int,25>> f(n+1);
     auto rmq=[&](){
         for(int i=1;i<=n;i++) f[i][0]=a[i];
         for(int j=1;j<=20;j++){
