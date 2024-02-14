@@ -1,63 +1,43 @@
-#include <bits/stdc++.h>
-using namespace std;
-#define ll long long
-const int N=3e5+5;
-//可持久化线段树(主席树)
-#define N 200005
-#define lc(x) tr[x].ch[0]
-#define rc(x) tr[x].ch[1]
-int n,m,a[N];
-vector<int> v;
-struct node{
-    int ch[2];
-    int s;//节点值域中有多少数
-}tr[N*22];
-int root[N],idx;
-void build(int &x,int l,int r){
-    x=++idx;
-    if(l==r) return;
-    int mid=(l+r)>>1;
-    build(lc(x),l,mid);
-    build(rc(x),mid+1,r);
-}
-void insert(int x,int &y,int l,int r,int v){
-    y=++idx;tr[y]=tr[x];tr[y].s++;
-    if(l==r) return;
-    int mid=(l+r)>>1;
-    if(v<=mid) insert(lc(x),lc(y),l,mid,v);
-    else insert(rc(x),rc(y),mid+1,r,v);
-}
-
-int query(int x,int y,int l,int r,int k){
-    if(l==r) return l;
-    int mid=(l+r)>>1;
-    int s=tr[lc(y)].s-tr[lc(x)].s;
-    if(k<=s) return query(lc(x),lc(y),l,mid,k);
-    else return query(rc(x),rc(y),mid+1,r,k-s);
-}
-int getid(int x){
-    return lower_bound(v.begin(),v.end(),x)-v.begin()+1;
-}
-int main(){
-    ios::sync_with_stdio(false);
-    cin.tie(0);
-    cin>>n>>m;
-    for(int i=1;i<=n;i++){
-        cin>>a[i];v.push_back(a[i]);
+struct ChairTree{
+    int n,tot;
+    vector<int> ls,rs,root,sum;
+    ChairTree(){};
+    ChairTree(int _n){
+        init(_n);
     }
-    sort(v.begin(),v.end());
-    v.erase(unique(v.begin(),v.end()),v.end());//进行离散化
-    int vn=v.size();
-    build(root[0],1,vn);
-    for(int i=1;i<=n;i++){
-        int id=getid(a[i]);
-        insert(root[i-1],root[i],1,vn,id);
+    void init(int _n){
+        this->n=_n;
+        int tmp=n*25;
+        ls.resize(tmp);
+        rs.resize(tmp);
+        sum.resize(tmp);
+        root.resize(n+5);
+        tot=0;
+        function<void(int&,int,int)> build=[&](int &u,int l,int r){
+            u=++tot;
+            if(l==r) return;
+            int mid=(l+r)>>1;
+            build(ls[u],l,mid);
+            build(rs[u],mid+1,r);
+        };
+        build(root[0],1,n);
     }
-    for(int i=1;i<=m;i++){
-        int l,r,k;cin>>l>>r>>k;
-        int id=query(root[l-1],root[r],1,vn,k)-1;
-        cout<<v[id]<<endl;
+    void apply(int &u,int v,int l,int r,int p){
+        u=++tot;
+        ls[u]=ls[v],rs[u]=rs[v],sum[u]=sum[v]+1;
+        if(l==r) return;
+        int mid=(l+r)>>1;
+        if(p<=mid) apply(ls[u],ls[v],l,mid,p);
+        else apply(rs[u],rs[v],mid+1,r,p);
     }
-    system("pause");
-    return 0;
-}
+    int query(int u,int v,int l,int r,int k){
+        if(l==r) return l;
+        int s=sum[ls[u]]-sum[ls[v]];
+        int mid=(l+r)>>1;
+        if(s>=k) return query(ls[u],ls[v],l,mid,k);
+        else return query(rs[u],rs[v],mid+1,r,k-s);
+    }
+    int rangeQuery(int l,int r,int k){
+        return query(root[r],root[l-1],1,n,k);
+    }
+};

@@ -1,24 +1,4 @@
-//KMP算法
-void KMP(){
-    string s,p;cin>>s>>p;//s是主串
-    int n=p.size(),m=s.size();
-    s=" "+s;p=" "+p;
-    vector<int> ne(p.size());
-    ne[1]=0;
-    for(int i=2,j=0;i<=n;i++){
-        while(j&&p[i]!=p[j+1]) j=ne[j];
-        if(p[i]==p[j+1]) j++;
-        ne[i]=j;
-    }
-    for(int i=1,j=0;i<=m;i++){
-        while(j&&s[i]!=p[j+1]) j=ne[j];
-        if(s[i]==p[j+1]) j++;
-        if(j==n) cout<<i-n+1<<'\n';//输出符合要求的所有位置，可根据要求更改代码
-    }
-    for(int i=1;i<=n;i++){
-        cout<<ne[i]<<" ";
-    }
-}
+
 
 //扩展KMP算法（z函数）
 void get_z(string s,int n){
