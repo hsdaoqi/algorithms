@@ -84,7 +84,7 @@ struct HLD {
     }
 
     bool isAncester(int u, int v) {//判断u是不是v的祖先
-        return in[u] <= in[v] && in[v] < out[u];
+        return in[u] <= in[v] && in[v] <= out[u];
     }
     int rootedParent(int u, int v) {
         std::swap(u, v);

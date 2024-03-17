@@ -15,11 +15,11 @@
 template<typename T>
 struct Shortest_path {
     int n,inf;
-    vector<T> dis,cnt;
-    vector<vector<T>> d;
-    vector<vector<pair<int, T>>> adj;
-    vector<bool> vis;
-    priority_queue<pair<T, int>, vector<pair<T, int>>, greater<>> pq;
+    std::vector<T> dis,cnt;
+    std::vector<std::vector<T>> d;
+    std::vector<std::vector<std::pair<int, T>>> adj;
+    std::vector<bool> vis;
+    std::priority_queue<std::pair<T, int>, std::vector<std::pair<T, int>>, std::greater<>> pq;
     Shortest_path() {};
     Shortest_path(int _n, T _d = 1e9) : n(_n),inf(_d) {
         Init(_n);
@@ -58,7 +58,7 @@ struct Shortest_path {
     }
 
     bool spfa(int s = 1){
-        queue<int> q;
+        std::queue<int> q;
         fill(dis.begin(), dis.end(), inf);
         fill(vis.begin(), vis.end(), 0);
         fill(cnt.begin(), cnt.end(), 0);
@@ -78,7 +78,7 @@ struct Shortest_path {
         return false;
     }
     bool johnson(){//全源最短路O(nmlog(m))
-        d.assign(n, vector<T>(n, inf));
+        d.assign(n, std::vector<T>(n, inf));
         for(int i=1;i<n;i++)  addEdge1(0,i,0);//加虚拟边
 
         if(spfa(0)) return false;
@@ -97,8 +97,8 @@ struct Shortest_path {
         return true;
     }
     T K_th(int s,int t,int k){//使用A*算法
-	fill(cnt.begin(), cnt.end(), 0);
-        vector<vector<pair<int,T>>> e(n);
+        fill(cnt.begin(), cnt.end(), 0);
+        std::vector<std::vector<std::pair<int,T>>> e(n);
         for(int i=1;i<n;i++){
             for(auto [v,w]:adj[i]){
                 e[v].emplace_back(i,w);
@@ -106,7 +106,7 @@ struct Shortest_path {
         }
         dijkstra(t);
         if(s==t) k++;
-        priority_queue<tuple<T,int,T>,vector<tuple<T,int,T>>,greater<>> q;//总长,u,已有的w
+        std::priority_queue<std::tuple<T,int,T>,std::vector<std::tuple<T,int,T>>,std::greater<>> q;//总长,u,已有的w
         q.emplace(dis[s],s,0);
         while(!q.empty()){
             auto [f,u,dd]=q.top();q.pop();
@@ -119,4 +119,3 @@ struct Shortest_path {
         return -1;//没有第k短路
     }
 };
-

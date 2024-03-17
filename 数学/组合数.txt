@@ -3,7 +3,7 @@ template<typename T>
 struct Comb {
     //大质数-->1999999999999999909
     const T mod = 1e9 + 7;
-    vector<T> fav,inv;
+    std::vector<T> fav,inv;
     Comb(){
         fav.resize((int)1e6+5);
         inv.resize((int)1e6+5);

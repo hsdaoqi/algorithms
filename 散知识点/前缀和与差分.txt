@@ -13,5 +13,27 @@
 	边前缀和：s[x]+s[y]-2*s[lca]
 
 	差分：
-		点差分--> dx +1 ,dy + 1, dlca -1, d[fa[lca]]-1
-		边差分--> dx+1 ,dy+1,dlca-2
+		点差分--> s[x] +1 ,d[y] + 1, s[lca] -1, s[fa[lca]]-1
+		边差分--> s[x]+1 ,s[y]+1,s[lca]-2
+
+
+
+
+int k;std::cin >> k;
+    while (k--) {
+        int u, v;
+        std::cin >> u >> v;
+        doc[u]++, doc[v]++;
+        doc[lca(u, v)] -= 2;
+    }
+
+    std::vector<int> ans(n + 1);
+    std::function<void(int, int)> dfs2 = [&](int u, int fa) {
+        for (auto [v, id]: adj[u]) {
+            if (v == fa) continue;
+            dfs2(v, u);
+            ans[id] = doc[v];
+            doc[u] += doc[v];
+        }
+    };
+    dfs2(1, 0);

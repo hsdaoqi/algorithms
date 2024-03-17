@@ -9,11 +9,11 @@
 template<typename T>
 struct MST {
     int n,m,inf;
-    vector<vector<pair<int, T>>> adj;
-    vector<tuple<T,int,int>> E;
-    vector<bool> vis;
-    vector<T> dis;
-    vector<int> fa;
+    std::vector<std::vector<std::pair<int, T>>> adj;
+    std::vector<std::tuple<T,int,int>> E;
+    std::vector<bool> vis;
+    std::vector<T> dis;
+    std::vector<int> fa;
     MST() {};
     MST(int _n,int _m = 0 ,T _d = 1e9) : n(_n),m(_m),inf(_d){
         Init(_n);

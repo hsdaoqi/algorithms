@@ -1,29 +1,20 @@
+
 using ll = long long;
-vector<ll>  M={1610612741,0,805306457,402653189,201326611,100663319,50331653,1000000007,1000000009};
+std::vector<ll>  M={1610612741,0,805306457,402653189,201326611,100663319,50331653,1000000007,1000000009};
 struct Hash{
     int n;
-    vector<ll> P1,P2,h1,h2;
+    std::vector<ll> P1,P2,h1,h2;
     ll p1=131,p2=13331;
 
     Hash(){};
-    Hash(const string &s){
+    Hash(const std::string &s){
         Init(s);
     }
-    bool is_prime(ll n){
-        for(int i=2;i<=(ll)sqrt(n);i++){
-            if(n%i==0) return false;
-        }
-        return true;
-    }
-    ll findprime(ll n){
-        while(!is_prime(n)) n++;
-        return n;
-    }
     void change(){
-        mt19937 rng(chrono::system_clock::now().time_since_epoch().count());
+        std::mt19937 rng(std::chrono::system_clock::now().time_since_epoch().count());
         while(M[1]==0||M[2]==0) shuffle(M.begin(), M.end(),rng);
     }
-    void Init(const string &s){
+    void Init(const std::string &s){
         if(M[1]==0) change();
         n=s.size();
         P1.resize(n+1);
@@ -38,7 +29,7 @@ struct Hash{
             h2[i]=(h2[i-1]*p2+s[i-1])%M[2];
         }
     }
-    pair<ll,ll> get(int l,int r){
+    std::pair<ll,ll> get(int l,int r){
         ll t1=((h1[r]-h1[l-1]*P1[r-l+1])%M[1]+M[1])%M[1];
         ll t2=((h2[r]-h2[l-1]*P2[r-l+1])%M[2]+M[2])%M[2];
         return {t1,t2};

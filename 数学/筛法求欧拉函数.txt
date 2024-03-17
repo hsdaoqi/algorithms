@@ -1,0 +1,21 @@
+std::vector<int> minp,phi,primes;
+void get_phi(int n){
+    minp.resize(n+1);phi.resize(n+1);phi[1]=1;
+    for(int i=2;i<=n;i++){
+        if(minp[i]==0){
+            minp[i]=i;
+            phi[i]=i-1;
+            primes.push_back(i);
+        }
+        for(int p:primes){
+            if(i*p>n) break;
+            minp[i*p]=p;
+            if(i%p==0){
+                phi[i*p]=p*phi[i];
+                break;
+            }else{
+                phi[i*p]=(p-1)*phi[i];
+            }
+        }
+    }
+}
