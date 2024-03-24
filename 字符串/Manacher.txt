@@ -1,5 +1,5 @@
 std::vector<int> manacher(std::string s) {
-    std::string t = "#";
+    std::string t = " #";
     for (auto c : s) {
         t += c;
         t += '#';
