@@ -41,4 +41,12 @@ struct Hash{
         it3.second=(it1.second+it2.second)%M[2];
         return it3;
     }
+    std::pair<i64,i64> mul(std::pair<i64,i64> l,std::pair<i64,i64> r,i64 len){
+        std::pair<i64,i64> it;
+        l.first*=P1[len]%=M[1];
+        l.second*=P2[len]%=M[2];
+        it.first=(l.first+r.first)%M[1];
+        it.second=(l.second+r.second)%M[2];
+        return it;
+    }
 };

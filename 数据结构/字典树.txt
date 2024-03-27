@@ -1,69 +1,33 @@
-struct Trie{
-    int mod=1e18;
-    int n,cnt;
-    int tot;
-    vector<vector<int>> tr;
-    vector<int> val,count;
+struct Trie {
+    struct node {
+        node *son[2]{};
+    } *root;
     Trie(){
-        init(1e5+5,26);
+        root=new node{};
     }
-    Trie(int _n,int _cnt){
-        init(_n,_cnt);
-    }
-    void init(int _n,int _cnt){
-        this->n=_n;
-        this->cnt=_cnt;
-        this->tot=0;
-        tr.assign(n,vector<int>(cnt,0));
-        val.resize(n);
-        //count.resize(n);
-    }
-    void Init(){
-        tot=0;
-        fill(tr[0].begin(),tr[0].end(),0);
-    }
-    int newnode(){
-        tot++;
-        fill(tr[tot].begin(),tr[tot].end(),0);
-        val[tot]=0;
-        return tot;
-    }
-
-    template<class T>
-    void insert_int(int x,T v = 0){
-        int p=0;
-        for(int i=31;i>=0;i--){
-            int t=x>>i&1;
-            if(!tr[p][t]) tr[p][t]=newnode();
-            p=tr[p][t];
-            val[p]=(val[p]+v)%mod;
-        }
-    }
-    void insert_str(string s){
-        int p=0;
-        for(char c:s){
-            int t=c-'a';
-            if(!tr[p][t]) tr[p][t]=newnode();
-            p=tr[p][t];
-        }
-        count[p]++;
-    }
-
-    template<class T>
-    T query(T x,T y){
-        int p=0;
-        T ans=0;
-        for(int i=31;i>=0;i--){
-            int t=x>>i&1;
-            if(((y>>i)&1)==1){
-                if(tr[p][t]) ans=(ans+val[tr[p][t]])%mod;
-                p=tr[p][t^1];
-            }else{
-                p=tr[p][t];
+    void insert(int val) {
+        auto cur = root;
+        for (int i = 30; i >= 0; i--) {
+            int p = val >> i & 1;
+            if (cur->son[p] == nullptr) {
+                cur->son[p] = new node{};
             }
-            if(p==0) break;
+            cur = cur->son[p];
         }
-        ans=(ans+val[p])%mod;
+    }
+
+    int query(int val) {
+        auto cur = root;
+        int ans = 0;
+        for (int i = 30; i >= 0; i--) {
+            int p = val >> i & 1;
+            if (cur->son[p ^ 1] != nullptr) {
+                ans += 1 << i;
+                cur = cur->son[p ^ 1];
+            } else {
+                cur = cur->son[p];
+            }
+        }
         return ans;
     }
 };

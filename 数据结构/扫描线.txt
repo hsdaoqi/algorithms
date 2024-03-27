@@ -1,18 +1,19 @@
+template<class T>
 struct LineTree {
     int n ;
     struct line {
-        int x1, x2, y;
+        T x1, x2, y;
         int tag;
         bool operator<(line &t) { return y < t.y; }
     };
     struct tree {
-        int l, r;
-        int cnt, len;
+        int l, r,cnt;
+        T len;
     };
-    vector<line> L;
-    vector<tree> tr;
-    vector<int> X;
-    vector<tuple<int,int,int,int>> doc;
+    std::vector<line> L;
+    std::vector<tree> tr;
+    std::vector<T> X;
+    std::vector<std::tuple<T,T,T,T>> doc;
     LineTree(int _n=2e5){
         init(_n+5);
     }
@@ -23,10 +24,10 @@ struct LineTree {
         X.resize(n);
         doc.resize(1);
     }
-    void add(int x1,int y1,int x2,int y2){
+    void add(T x1,T y1,T x2,T y2){
         doc.emplace_back(x1,y1,x2,y2);
     }
-    int work(){
+    T work(){
         for(int i=1;i<doc.size();i++){
             auto &[x1,y1,x2,y2]=doc[i];
             L[i]={x1,x2,y1,1};
@@ -37,12 +38,12 @@ struct LineTree {
         sort(X.begin()+1, X.end());
         int tot = unique(X.begin()+1, X.end()) - X.begin();
         build(1, 1, tot - 2);
-        int ans = 0;
+        T ans = 0;
         for (int i = 1; i < n; i++) {
             int l = lower_bound(X.begin()+1, X.begin()+tot, L[i].x1) - X.begin();
             int r = lower_bound(X.begin()+1, X.begin()+tot, L[i].x2) - X.begin();
             apply(1, l, r - 1, L[i].tag);
-            ans += tr[1].len * (L[i + 1].y - L[i].y);
+            ans += tr[1].len *1.0*1ll*(L[i + 1].y - L[i].y);
         }
         return ans;
     }
