@@ -1,31 +1,35 @@
+using i64 = long long;
 std::vector<i64>  M={1610612741,0,805306457,402653189,201326611,100663319,50331653,1000000007,1000000009};
 struct Hash{
-    int n;
+    int n{};
     std::vector<i64> P1,P2,h1,h2;
     i64 p1=131,p2=13331;
 
     Hash(){};
-    Hash(const std::string &s){
+    Hash(std::string &s){
         Init(s);
     }
     void change(){
         std::mt19937 rng(std::chrono::system_clock::now().time_since_epoch().count());
         while(M[1]==0||M[2]==0) shuffle(M.begin(), M.end(),rng);
     }
-    void Init(const std::string &s){
+    void deal(int st,int len,std::string &s){
+        P1.resize(len+1);
+        P2.resize(len+1);
+        h1.resize(len+1);
+        h2.resize(len+1);
+        P1[0]=1;P2[0]=1;
+        for(int i=st;i<=len;i++){
+            P1[i]=(P1[i-1]*p1)%M[1];
+            h1[i]=(h1[i-1]*p1+s[i-st])%M[1];
+            P2[i]=(P2[i-1]*p2)%M[2];
+            h2[i]=(h2[i-1]*p2+s[i-st])%M[2];
+        }
+    }
+    void Init(std::string &s){
         if(M[1]==0) change();
         n=s.size();
-        P1.resize(n+1);
-        P2.resize(n+1);
-        h1.resize(n+1);
-        h2.resize(n+1);
-        P1[0]=1;P2[0]=1;
-        for(int i=1;i<=n;i++){
-            P1[i]=(P1[i-1]*p1)%M[1];
-            h1[i]=(h1[i-1]*p1+s[i-1])%M[1];
-            P2[i]=(P2[i-1]*p2)%M[2];
-            h2[i]=(h2[i-1]*p2+s[i-1])%M[2];
-        }
+        deal(1,n,s);
     }
     std::pair<i64,i64> get(int l,int r){
         i64 t1=((h1[r]-h1[l-1]*P1[r-l+1])%M[1]+M[1])%M[1];
@@ -48,5 +52,10 @@ struct Hash{
         it.first=(l.first+r.first)%M[1];
         it.second=(l.second+r.second)%M[2];
         return it;
+    }
+    void push_back(std::string s){
+        int tn=(int)s.size();
+        deal(n+1,tn+n,s);
+        n=n+tn;
     }
 };

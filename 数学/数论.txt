@@ -48,6 +48,11 @@ while(n){
 	动态规划：
 	dp[n][m]=dp[n-1][m]*m+dp[n-1][m-1];
 
+
+11曼哈顿距离转化为切比雪夫距离
+	(x1,y1),(x2,y2)-->(x1+y1,y1-x1),(x2+y2,y2-x2)--->(x1`,y1`),(x2`,y2`),
+	两点之间距离为abs(x1-x2)+abs(y1-y2)=max(abs(x1`-x2`),abs(y1`-y2`))
+
 //代码区
 //快速幂算法，求(a^b)%c的结果
 ll fast_pow(ll a,ll b, ll c){
@@ -195,38 +200,6 @@ int main(){
 	}
 	cout<<sum<<endl;
 	return 0;
-}
-
-
-
-
-
-//欧拉筛
-int prime[N],cnt;
-bool vis[N];
-void Euler(){
-    for(int i=2;i<N;i++){
-        if(!vis[i]){
-            prime[++cnt]=i;
-        }
-        for(int j=1;prime[j]<N/i;j++){
-            vis[prime[j]*i]=true;
-            if(i%prime[j]==0) break;
-        }
-    }
-}
-
-
-int phi(int n){//试除法求欧拉函数
-    int res=n;
-    for(int i=2;i*i<=n;i++){
-        if(n%i==0){
-            while(n%i==0) n/=i;
-            res=res/i*(i-1);
-        }
-    }
-    if(n>1) res=res/n*(n-1);
-    return res;
 }
 
 
