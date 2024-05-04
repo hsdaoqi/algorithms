@@ -1,8 +1,16 @@
+template<class T>
 struct SuffixArray {
     int n;
     std::vector<int> sa, rk, lc;
-    SuffixArray(const std::string &s) {
-        n = s.length();
+    SuffixArray(const std::string &s){
+        vector<char> s1(s.begin(), s.end());
+        init(s1);
+    }
+    SuffixArray(const std::vector<T> &s) {
+        init(s);
+    }
+    void init(const std::vector<T> &s){
+        n = s.size();
         sa.resize(n);
         lc.resize(n - 1);
         rk.resize(n);

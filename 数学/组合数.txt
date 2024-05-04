@@ -2,16 +2,12 @@
 template<typename T>
 struct Comb {
     //大质数-->1999999999999999909
-    const T mod = 1e9 + 7;
+    T mod = 1e9 + 7;
     std::vector<T> fav,inv;
     Comb(){
-        fav.resize((int)1e6+5);
-        inv.resize((int)1e6+5);
         Init((int)1e6);
     }
     Comb(T n){
-        fav.resize(n+5);
-        inv.resize(n+5);
         Init(n);
     }
     T fast_pow(T a, T b, T p) {
@@ -26,6 +22,8 @@ struct Comb {
     }
     //Cnm=n!/((n-m)!*m!)
     void Init(T n) {
+        fav.resize(n+5);
+        inv.resize(n+5);
         fav[0] = inv[0] = 1;
         for (int i = 1; i <= n; i++) {
             fav[i] = fav[i - 1] * i % mod;//求n的阶乘
@@ -44,5 +42,14 @@ struct Comb {
     T A(T n, T m) {
         if (n < 0 || m < 0 || n < m) return 0;
         return (fav[n] * inv[n - m]) % mod;
+    }
+
+    T lucas(T n,T m){
+        if(m==0) return 1;
+        return lucas(n/mod,m/mod)*C(n%mod,m%mod)%mod;
+    }
+
+    T catalan(int n){
+        return ((C(n*2,n)-C(n*2,n-1))%mod+mod)%mod;
     }
 };

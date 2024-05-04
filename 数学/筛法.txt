@@ -99,6 +99,7 @@ void factor(int n){
             if(i%p==0){
                 mi[i*p]=mi[i]+1;
                 fac[i*p]=fac[i]/mi[i*p]*(mi[i*p]+1);
+		break;
             }else{
                 mi[i*p]=1,fac[i*p]=fac[i]*2;
             }
