@@ -1,33 +1,41 @@
 struct Trie {
     struct node {
-        node *son[2]{};
-    } *root;
+        array<int,26> son;
+        int cnt=0;
+        node():son{} {}
+    };
+    std::vector<node> t;
     Trie(){
-        root=new node{};
+        init();
     }
-    void insert(int val) {
-        auto cur = root;
-        for (int i = 30; i >= 0; i--) {
-            int p = val >> i & 1;
-            if (cur->son[p] == nullptr) {
-                cur->son[p] = new node{};
+    void init(){
+        t.assign(1,node());
+    }
+    int newnode(){
+        t.emplace_back();
+        return t.size()-1;
+    }
+    void insert(const string &val) {
+        int p = 0;
+        for (char c:val) {
+            int ne = c-'a';
+            if (t[p].son[ne]==0) {
+                t[p].son[ne] = newnode();
             }
-            cur = cur->son[p];
+            p=t[p].son[ne];
+            t[p].cnt++;
         }
     }
 
-    int query(int val) {
-        auto cur = root;
-        int ans = 0;
-        for (int i = 30; i >= 0; i--) {
-            int p = val >> i & 1;
-            if (cur->son[p ^ 1] != nullptr) {
-                ans += 1 << i;
-                cur = cur->son[p ^ 1];
-            } else {
-                cur = cur->son[p];
+    int query(const string &val) {
+        int p = 0;
+        for(char c:val){
+            int ne=c-'a';
+            if(t[p].son[ne]==0){
+                return 0;
             }
+            p=t[p].son[ne];
         }
-        return ans;
+        return t[p].cnt;
     }
 };

@@ -1,3 +1,4 @@
+//高斯消元法
 struct GAUSS{
     const double eps=1e-6;
     bool gauss(std::vector<std::vector<double>> &a){

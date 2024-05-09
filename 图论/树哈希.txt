@@ -1,3 +1,4 @@
+//树哈希
 struct TreeHash {
     using ull = unsigned long long;
     mt19937 rng;

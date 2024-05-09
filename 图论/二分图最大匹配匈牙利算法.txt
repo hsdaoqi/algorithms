@@ -1,3 +1,4 @@
+//二分图最大匹配匈牙利算法
 int Hgr(vector<vector<int>> &adj){
     vector<int> vis(adj.size()),match(adj.size());
     int cnt=0;

@@ -1,3 +1,4 @@
+//tarjan求割边
 struct CUTB{
     int n;
     vector<vector<pair<int,int>>> adj;

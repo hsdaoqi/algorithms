@@ -130,8 +130,6 @@ void link_inv() {
 }
 
 
-
-
 //整数分块
 int block(int n){
     int ans=0;

@@ -1,3 +1,4 @@
+//Miller-Rabin素数测试与Pollard-Rho因式分解
 i64 mul(i64 a, i64 b, i64 m) {
     return static_cast<__int128>(a) * b % m;
 }

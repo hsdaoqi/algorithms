@@ -1,3 +1,4 @@
+//矩阵快速幂
 constexpr int mod=1e9+7;
 struct grid{
 	int n;

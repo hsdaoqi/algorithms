@@ -1,3 +1,4 @@
+//线性基
 struct LinearBasis{
     const static int MAXL=62;
     vector<int> a;
