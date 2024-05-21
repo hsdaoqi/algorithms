@@ -18,13 +18,13 @@ struct Trie {
     void insert(const string &val) {
         int p = 0;
         for (char c:val) {
-            int ne = c-'a';
-            if (t[p].son[ne]==0) {
+            int ne = c - 'a';
+            if (t[p].son[ne] == 0) {
                 t[p].son[ne] = newnode();
             }
-            p=t[p].son[ne];
-            t[p].cnt++;
+            p = t[p].son[ne];
         }
+        t[p].cnt++;
     }
 
     int query(const string &val) {

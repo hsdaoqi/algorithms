@@ -1,39 +1,33 @@
 struct ChairTree{
-    int n,ver,tot;
-    vector<int> ls,rs,root,sum;
-    ChairTree(){};
-    ChairTree(int _n){
-        init(_n,_n);
+    int tot,n,inf;
+    vector<int> rs,ls,sum,root;
+    ChairTree(){}
+    ChairTree(int _n,int _inf){//版本数，最大值
+        init(_n,_inf);
     }
-    ChairTree(int _n,int _ver){
-        init(_n,_ver);
-    }
-    void init(int _n,int _ver){
-        this->n=_n;
-        this->ver=_ver;
-        int tmp=n*25;
-        ls.resize(tmp);
-        rs.resize(tmp);
-        sum.resize(tmp);
-        root.resize(_ver+5);
+    void init(int _n,int _inf){
+        n=_n;
+        inf=_inf;
         tot=0;
-        function<void(int&,int,int)> build=[&](int &u,int l,int r){
-            u=++tot;
-            if(l==r) return;
-            int mid=(l+r)>>1;
-            build(ls[u],l,mid);
-            build(rs[u],mid+1,r);
-        };
-        build(root[0],1,n);
+        rs.resize(1,0);
+        ls.resize(1,0);
+        sum.resize(1,0);
+        root.resize(n,0);
     }
     void apply(int &u,int v,int l,int r,int p){
         u=++tot;
-        ls[u]=ls[v],rs[u]=rs[v],sum[u]=sum[v]+1;
+        rs.emplace_back();ls.emplace_back();sum.emplace_back();
+        ls.back()=ls[v],rs.back()=rs[v],sum.back()=sum[v]+1;
         if(l==r) return;
         int mid=(l+r)>>1;
-        if(p<=mid) apply(ls[u],ls[v],l,mid,p);
-        else apply(rs[u],rs[v],mid+1,r,p);
+        if(p<=mid) apply(ls.back(),ls[v],l,mid,p);
+        else apply(rs.back(),rs[v],mid+1,r,p);
     }
+
+    void apply(int v1,int v2,int p){
+        apply(root[v1],root[v2],1,inf,p);
+    }
+
     int query(int u,int v,int l,int r,int k){
         if(l==r) return l;
         int s=sum[ls[u]]-sum[ls[v]];
@@ -41,7 +35,8 @@ struct ChairTree{
         if(s>=k) return query(ls[u],ls[v],l,mid,k);
         else return query(rs[u],rs[v],mid+1,r,k-s);
     }
-    int rangeQuery(int l,int r,int k){
-        return query(root[r],root[l-1],1,n,k);
+
+    int query(int l,int r,int k){
+        return query(root[r],root[l],1,inf,k);
     }
 };
