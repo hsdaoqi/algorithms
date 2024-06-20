@@ -1,26 +1,18 @@
-using i128=__int128;
+using i128 = __int128;
 // 重载输入运算符以支持__int128类型
-std::istream& operator>>(std::istream& is, __int128& n) {
-    std::string str;is >> str;
-    n=0;
-    int st=(str[0]=='-');
-    for(int i=st;i<str.size();i++){
-        n = n*10+str[i]-'0';
-    }
-    if(st==1) n*=-1;
+std::istream &operator>>(std::istream &is, __int128 &val) {
+    std::string str;is >> str; val = 0;
+    bool neg = false;
+    if (str[0] == '-') neg = true, str = str.substr(1);
+    for (char &c: str) val = val * 10 + c - '0';
+    if (neg) val = -val;
     return is;
 }
-//载输出运算符以支持__int128类型
-std::ostream &operator<<(std::ostream &os, __int128 n) {
-    std::string s;
-    if(n==0) s="0";
-    bool flag=false;
-    if(n<0) flag=true,n=-n;
-    while (n) {
-        s += '0' + n % 10;
-        n /= 10;
-    }
-    if(flag) s+='-';
-    std::reverse(s.begin(), s.end());
-    return os << s;
+
+//重载输出运算符以支持__int128类型
+std::ostream &operator<<(std::ostream &os, __int128 val) {
+    if (val < 0) os << "-", val = -val;
+    if (val > 9) os << val / 10;
+    os << static_cast<char>(val % 10 + '0');
+    return os;
 }
