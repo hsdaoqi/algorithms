@@ -12,7 +12,7 @@ struct RMQ {
     }
 
     void work(std::vector<T> &init_) {
-        work(init_, [&](int x, int y) { return max(x, y); });
+        work(init_, [&](int x, int y) { return std::max(x, y); });
     }
 
     void work(std::vector<T> &init_, std::function<T(T, T)> func_) {
@@ -20,9 +20,9 @@ struct RMQ {
         this->func = func_;
         this->n = a.size();
         this->f.assign(n, {});
-        for (int i = 1; i < n; i++) f[i][0] = a[i];
-        for (int j = 1; j <= __lg(n) + 1; j++) {
-            for (int i = 1; i + (1 << j) - 1 < n; i++) {
+        for (int i = 0; i < n; i++) f[i][0] = a[i];
+        for (int j = 1; j <= std::__lg(n) + 1; j++) {
+            for (int i = 0; i + (1 << j) - 1 < n; i++) {
                 f[i][j] = func(f[i][j - 1], f[i + (1 << (j - 1))][j - 1]);
             }
         }

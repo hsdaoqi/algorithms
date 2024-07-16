@@ -3,7 +3,7 @@ struct Point {
     T x;
     T y;
     Point(T x_ = 0, T y_ = 0) : x(x_), y(y_) {}
-    
+
     template<class U>
     operator Point<U>() {
         return Point<U>(U(x), U(y));
@@ -45,27 +45,27 @@ struct Point {
         return is >> p.x >> p.y;
     }
     friend std::ostream &operator<<(std::ostream &os, Point p) {
-        return os << "(" << p.x << ", " << p.y << ")";
+        return os << p.x << " " << p.y;
     }
 };
 
 template<class T>
-T dot(Point<T> a, Point<T> b) {
+T dot(Point<T> a, Point<T> b) {//计算两个点之间的点积。
     return a.x * b.x + a.y * b.y;
 }
 
 template<class T>
-T cross(Point<T> a, Point<T> b) {
+T cross(Point<T> a, Point<T> b) {//计算两个点之间的叉积
     return a.x * b.y - a.y * b.x;
 }
 
 template<class T>
-T square(Point<T> p) {
+T square(Point<T> p) {//计算一个点与其自身的点积
     return dot(p, p);
 }
 
 template<class T>
-double length(Point<T> p) {
+double length(Point<T> p) {//计算一个点表示的向量的长度
     return std::sqrt(double(square(p)));
 }
 
@@ -78,43 +78,56 @@ struct Line {
     Point<T> a;
     Point<T> b;
     Line(Point<T> a_ = Point<T>(), Point<T> b_ = Point<T>()) : a(a_), b(b_) {}
+    friend std::istream &operator>>(std::istream &is,Line &l){
+        return is>>l.a.x>>l.a.y>>l.b.x>>l.b.y;
+    }
 };
 
 template<class T>
-Point<T> rotate(Point<T> a) {
-    return Point(-a.y, a.x);
+T dist(Point<T> a,Point<T> b){//计算两点之间的距离
+    return hypot(a.x-b.x,a.y-b.y);
 }
 
+template<class T>
+T dist(Line<T> line){//计算直线的距离
+    return hypot(line.a.x-line.b.x,line.a.y-line.b.y);
+}
+
+template<class T>
+Point<T> rotate(Point<T> a) {//将一个点绕原点旋转 90 度（逆时针）
+    return Point(-a.y, a.x);
+}
+//根据点的位置（相对于原点）返回一个符号值。如果点在 x 轴上方（或在 x 轴上但 y = 0 且 x > 0），则返回 1；否则返回 -1。
 template<class T>
 int sgn(Point<T> a) {
     return a.y > 0 || (a.y == 0 && a.x > 0) ? 1 : -1;
 }
 
 template<class T>
-bool pointOnLineLeft(Point<T> p, Line<T> l) {
+bool pointOnLineLeft(Point<T> p, Line<T> l) {//判断点 p 是否在线段 l 的左侧（不包括线段上）。
     return cross(l.b - l.a, p - l.a) > 0;
 }
 
 template<class T>
-Point<T> lineIntersection(Line<T> l1, Line<T> l2) {
+Point<T> lineIntersection(Line<T> l1, Line<T> l2) {//计算两条线段 l1 和 l2 的交点。
     return l1.a + (l1.b - l1.a) * (cross(l2.b - l2.a, l1.a - l2.a) / cross(l2.b - l2.a, l1.a - l1.b));
 }
 
 template<class T>
-bool pointOnSegment(Point<T> p, Line<T> l) {
+bool pointOnSegment(Point<T> p, Line<T> l) {//判断点 p 是否在线段 l 上（包括端点）。
     return cross(p - l.a, l.b - l.a) == 0 && std::min(l.a.x, l.b.x) <= p.x && p.x <= std::max(l.a.x, l.b.x)
-    && std::min(l.a.y, l.b.y) <= p.y && p.y <= std::max(l.a.y, l.b.y);
+           && std::min(l.a.y, l.b.y) <= p.y && p.y <= std::max(l.a.y, l.b.y);
 }
 
 template<class T>
-bool pointInPolygon(Point<T> a, std::vector<Point<T>> p) {
+bool pointInPolygon(Point<T> a, std::vector<Point<T>> p) {//判断点 a 是否在多边形 p 内部。
     int n = p.size();
     for (int i = 0; i < n; i++) {
         if (pointOnSegment(a, Line(p[i], p[(i + 1) % n]))) {
             return true;
         }
     }
-    
+
     int t = 0;
     for (int i = 0; i < n; i++) {
         auto u = p[i];
@@ -126,14 +139,15 @@ bool pointInPolygon(Point<T> a, std::vector<Point<T>> p) {
             t ^= 1;
         }
     }
-    
+
     return t == 1;
 }
 
-// 0 : not intersect
-// 1 : strictly intersect
-// 2 : overlap
-// 3 : intersect at endpoint
+// 0 : not intersect不相交
+// 1 : strictly intersect严格相交
+// 2 : overlap重叠
+// 3 : intersect at endpoint在端点相交
+//判断两条线段 l1 和 l2 是否相交，
 template<class T>
 std::tuple<int, Point<T>, Point<T>> segmentIntersection(Line<T> l1, Line<T> l2) {
     if (std::max(l1.a.x, l1.b.x) < std::min(l2.a.x, l2.b.x)) {
@@ -176,11 +190,11 @@ std::tuple<int, Point<T>, Point<T>> segmentIntersection(Line<T> l1, Line<T> l2) 
     auto cp2 = cross(l2.a - l1.b, l2.b - l1.b);
     auto cp3 = cross(l1.a - l2.a, l1.b - l2.a);
     auto cp4 = cross(l1.a - l2.b, l1.b - l2.b);
-    
+
     if ((cp1 > 0 && cp2 > 0) || (cp1 < 0 && cp2 < 0) || (cp3 > 0 && cp4 > 0) || (cp3 < 0 && cp4 < 0)) {
         return {0, Point<T>(), Point<T>()};
     }
-    
+
     Point p = lineIntersection(l1, l2);
     if (cp1 != 0 && cp2 != 0 && cp3 != 0 && cp4 != 0) {
         return {1, p, p};
@@ -189,6 +203,7 @@ std::tuple<int, Point<T>, Point<T>> segmentIntersection(Line<T> l1, Line<T> l2) 
     }
 }
 
+//判断一条线段 l 是否完全位于一个多边形 p 内部
 template<class T>
 bool segmentInPolygon(Line<T> l, std::vector<Point<T>> p) {
     int n = p.size();
@@ -203,7 +218,7 @@ bool segmentInPolygon(Line<T> l, std::vector<Point<T>> p) {
         auto v = p[(i + 1) % n];
         auto w = p[(i + 2) % n];
         auto [t, p1, p2] = segmentIntersection(l, Line(u, v));
-        
+
         if (t == 1) {
             return false;
         }
@@ -271,14 +286,14 @@ std::vector<Point<T>> hp(std::vector<Line<T>> lines) {
     std::sort(lines.begin(), lines.end(), [&](auto l1, auto l2) {
         auto d1 = l1.b - l1.a;
         auto d2 = l2.b - l2.a;
-        
+
         if (sgn(d1) != sgn(d2)) {
             return sgn(d1) == 1;
         }
-        
+
         return cross(d1, d2) > 0;
     });
-    
+
     std::deque<Line<T>> ls;
     std::deque<Point<T>> ps;
     for (auto l : lines) {
@@ -286,20 +301,20 @@ std::vector<Point<T>> hp(std::vector<Line<T>> lines) {
             ls.push_back(l);
             continue;
         }
-        
+
         while (!ps.empty() && !pointOnLineLeft(ps.back(), l)) {
             ps.pop_back();
             ls.pop_back();
         }
-        
+
         while (!ps.empty() && !pointOnLineLeft(ps[0], l)) {
             ps.pop_front();
             ls.pop_front();
         }
-        
+
         if (cross(l.b - l.a, ls.back().b - ls.back().a) == 0) {
             if (dot(l.b - l.a, ls.back().b - ls.back().a) > 0) {
-                
+
                 if (!pointOnLineLeft(ls.back().a, l)) {
                     assert(ls.size() == 1);
                     ls[0] = l;
@@ -308,11 +323,11 @@ std::vector<Point<T>> hp(std::vector<Line<T>> lines) {
             }
             return {};
         }
-        
+
         ps.push_back(lineIntersection(ls.back(), l));
         ls.push_back(l);
     }
-    
+
     while (!ps.empty() && !pointOnLineLeft(ps.back(), ls[0])) {
         ps.pop_back();
         ls.pop_back();
@@ -321,6 +336,6 @@ std::vector<Point<T>> hp(std::vector<Line<T>> lines) {
         return {};
     }
     ps.push_back(lineIntersection(ls[0], ls.back()));
-    
+
     return std::vector(ps.begin(), ps.end());
 }

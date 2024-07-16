@@ -10,7 +10,7 @@ struct Comb {
     Comb(T n){
         Init(n);
     }
-    T fast_pow(T a, T b, T p) {
+    T power(T a, T b, T p) {
         a %= p;
         T ans = 1;
         while (b) {
@@ -28,7 +28,7 @@ struct Comb {
         for (int i = 1; i <= n; i++) {
             fav[i] = fav[i - 1] * i % mod;//求n的阶乘
         }
-        inv[n] = fast_pow(fav[n], mod - 2, mod);
+        inv[n] = power(fav[n], mod - 2, mod);
         for (int i = n; i > 0; i--) {
             inv[i - 1] = inv[i] * i % mod;//求n的阶乘的逆元
         }

@@ -1,75 +1,73 @@
 //线性基
-struct LinearBasis{
-    const static int MAXL=62;
-    vector<int> a;
-    int tot,tot2;//线性基中的数的数量,原序列中数的数量
-    LinearBasis(){
-        tot=tot2=0;
-        a.resize(MAXL+1);
-        std::fill(a.begin(), a.end(), 0);
+template<class T>
+struct LineBasis {
+    const int MAXL = std::__lg(std::numeric_limits<T>::max());
+    std::vector<T> a;
+    int Linetot, Arrtot;
+
+    LineBasis operator+(const LineBasis &other) {
+        for (int i = 0; i <= MAXL; i++) insert(other.a[i]);
+        return this;
     }
 
-    LinearBasis(vector<int> &x){
-        tot=tot2=0;
-        a.resize(MAXL+1);
-        build(x, x.size()-1);
+    LineBasis() {
+        Linetot = Arrtot = 0;
+        a.resize(MAXL + 1);
     }
 
-    void insert(int t){
-        tot2++;
-        for (int j = MAXL; j >= 0; j--){
-            if (!t) return;
-            if (!(t & (1ll << j))) continue;
-            if (a[j]) t ^= a[j];
-            else{//插入的时候直接修改，在求第k小时就不用改了
-                for (int k = 0; k < j; k++) if (t & (1ll << k)) t ^= a[k];
-                for (int k = j + 1; k <= MAXL; k++) if (a[k] & (1ll << j)) a[k] ^= t;
-                a[j] = t;tot++;
+    LineBasis(std::vector<T> &x) {
+        Linetot = Arrtot = 0;
+        a.resize(MAXL + 1);
+        build(x, x.size() - 1);
+    }
+
+    bool insert(T val) {//插入，判断一个数是否可以异或出来
+        Arrtot++;
+        for (int j = MAXL; j >= 0; j--) {
+            if (!val) return false;
+            if (!(val & (1ll << j))) continue;
+            if (a[j]) {
+                val ^= a[j];
+            } else {//插入的时候直接修改，在求第k小时就不用改了
+                for (int k = 0; k < j; k++) {
+                    if (val & (1ll << k)) val ^= a[k];
+                }
+                for (int k = j + 1; k <= MAXL; k++) {
+                    if (a[k] & (1ll << j)) a[k] ^= val;
+                }
+                a[j] = val, Linetot++;
                 break;
             }
         }
+        return true;
     }
 
-    // 数组 x 表示集合 S，下标范围 [1...n]
-    void build(vector<int> &x, int n){
-        std::fill(a.begin(), a.end(), 0);
-        for (int i = 1; i <= n; i++){
-            insert(x[i]);
-        }
+    void build(std::vector<T> &x, int n) {
+        for (int i = 1; i <= n; i++) insert(x[i]);
     }
 
-    long long queryMax(){
-        long long res = 0;
+    T largest() {
+        T res = 0;
         for (int i = 0; i <= MAXL; i++) res ^= a[i];
         return res;
     }
 
-    int queryMin(){
-        if(tot<tot2) return 0;//原序列中有数无法插入说明，一定存在几个数异或之后为0
-        for(int i=0;i<=MAXL;i++){
-            if(a[i]) return a[i];
-        }
+    T smallest() {
+        if (Linetot < Arrtot) return 0;
+        for (int i = 0; i <= MAXL; i++) if (a[i]) return a[i];
     }
 
-    int k_th(int k){//d第k小
-        if(k==1&&tot<tot2)return 0;//特判一下，假如k=1，并且原来的序列可以异或出0，就要返回0，tot表示线性基中的元素个数，n表示序列长度
-        if(tot<tot2)k--;//类似上面，去掉0的情况，因为线性基中只能异或出不为0的解
-        int ans=0;
-        for(int i=0;i<=MAXL;i++){
-            if(a[i]!=0){
-                if(k&1) ans^=a[i];
-                k/=2;
+    T smallest(T k) {
+        if (k == 1 && Linetot < Arrtot)return 0;
+        if (Linetot < Arrtot) k--;
+        if (k >= 1ll << Linetot) return -1;
+        T ans = 0;
+        for (int i = 0; i <= MAXL; i++) {
+            if (a[i] != 0) {
+                if (k & 1) ans ^= a[i];
+                k /= 2;
             }
         }
         return ans;
-    }
-    void mergeFrom(const LinearBasis &other){
-        for (int i = 0; i <= MAXL; i++) insert(other.a[i]);
-    }
-
-    static LinearBasis merge(const LinearBasis &a, const LinearBasis &b){
-        LinearBasis res = a;
-        for (int i = 0; i <= MAXL; i++) res.insert(b.a[i]);
-        return res;
     }
 };
