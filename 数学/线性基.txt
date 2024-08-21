@@ -42,6 +42,16 @@ struct LineBasis {
         return true;
     }
 
+    bool find(T x) {
+        for (int i = 5; i >= 0; i--) {
+            if (x >> i & 1) {
+                if (!a[i]) break;
+                x ^= a[i];
+            }
+        }
+        return x == 0;
+    }
+
     void build(std::vector<T> &x, int n) {
         for (int i = 1; i <= n; i++) insert(x[i]);
     }

@@ -32,29 +32,29 @@ int phi(int x){
     if(x>1) ans=ans*(x-1)/x;
     return ans;
 }
-筛法
-std::vector<int> minp,phi,primes;
 
-void Phi(int n){
-    minp.assign(n+1,-1),phi.resize(n+1),phi[1]=1;
-    for(int i=2;i<=n;i++){
-        if(minp[i]==-1){
-            minp[i]=i,phi[i]=i-1;
+//筛法
+std::vector<i64> minp, phi, primes;
+
+void Phi(int n) {
+    minp.assign(n + 1, -1), phi.resize(n + 1), phi[1] = 1;
+    for (int i = 2; i <= n; i++) {
+        if (minp[i] == -1) {
+            minp[i] = i, phi[i] = i - 1;
             primes.push_back(i);
         }
-        for(int &p:primes){
-            if(i*p>n) break;
-            minp[i*p]=p;
-            if(i%p==0){
-                phi[i*p]=phi[i]*p;
+        for (auto &p: primes) {
+            if (i * p > n) break;
+            minp[i * p] = p;
+            if (i % p == 0) {
+                phi[i * p] = phi[i] * p;
                 break;
-            }else{
-                phi[i*p]=(p-1)*phi[i];
+            } else {
+                phi[i * p] = (p - 1) * phi[i];
             }
         }
     }
 }
-
 
 //筛法求有几种质因子
 std::vector<int> minp,fac,primes;

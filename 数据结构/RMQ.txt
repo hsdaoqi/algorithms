@@ -12,7 +12,7 @@ struct RMQ {
     }
 
     void work(std::vector<T> &init_) {
-        work(init_, [&](int x, int y) { return std::max(x, y); });
+        work(init_, [&](T x, T y) { return std::max(x, y); });
     }
 
     void work(std::vector<T> &init_, std::function<T(T, T)> func_) {
@@ -29,7 +29,7 @@ struct RMQ {
     }
 
     T query(int l, int r) {
-        int k = log2(r - l + 1);
+        int k = std::__lg(r - l + 1);
         return func(f[l][k], f[r - (1 << k) + 1][k]);
     }
 };

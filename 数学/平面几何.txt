@@ -1,49 +1,63 @@
+using l64 = long double;
+
 template<class T>
 struct Point {
     T x;
     T y;
+
     Point(T x_ = 0, T y_ = 0) : x(x_), y(y_) {}
 
     template<class U>
     operator Point<U>() {
         return Point<U>(U(x), U(y));
     }
-    Point &operator+=(Point p) & {
+
+    Point &operator+=(Point p) &{
         x += p.x;
         y += p.y;
         return *this;
     }
-    Point &operator-=(Point p) & {
+
+    Point &operator-=(Point p) &{
         x -= p.x;
         y -= p.y;
         return *this;
     }
-    Point &operator*=(T v) & {
+
+    Point &operator*=(T v) &{
         x *= v;
         y *= v;
         return *this;
     }
+
     Point operator-() const {
         return Point(-x, -y);
     }
+
     friend Point operator+(Point a, Point b) {
         return a += b;
     }
+
     friend Point operator-(Point a, Point b) {
         return a -= b;
     }
+
     friend Point operator*(Point a, T b) {
         return a *= b;
     }
+
     friend Point operator*(T a, Point b) {
         return b *= a;
     }
+
     friend bool operator==(Point a, Point b) {
         return a.x == b.x && a.y == b.y;
     }
+
     friend std::istream &operator>>(std::istream &is, Point &p) {
         return is >> p.x >> p.y;
     }
+
     friend std::ostream &operator<<(std::ostream &os, Point p) {
         return os << p.x << " " << p.y;
     }
@@ -77,26 +91,41 @@ template<class T>
 struct Line {
     Point<T> a;
     Point<T> b;
+
     Line(Point<T> a_ = Point<T>(), Point<T> b_ = Point<T>()) : a(a_), b(b_) {}
-    friend std::istream &operator>>(std::istream &is,Line &l){
-        return is>>l.a.x>>l.a.y>>l.b.x>>l.b.y;
+
+    friend std::istream &operator>>(std::istream &is, Line &l) {
+        return is >> l.a.x >> l.a.y >> l.b.x >> l.b.y;
     }
 };
 
 template<class T>
-T dist(Point<T> a,Point<T> b){//计算两点之间的距离
-    return hypot(a.x-b.x,a.y-b.y);
+T dist(Point<T> p, Line<T> line) {// 计算点道线段的距离
+    if (line.a == line.b) {
+        return dist(p, line.a);
+    }
+    Point<T> p1 = line.b - line.a, p2 = p - line.a, p3 = p - line.b;
+    if (dot(p1, p2) < 0) return length(p2);
+    if (dot(p1, p3) > 0) return length(p3);
+
+    return fabs(cross(line.b - line.a, p - line.a) / length(line.b - line.a));
 }
 
 template<class T>
-T dist(Line<T> line){//计算直线的距离
-    return hypot(line.a.x-line.b.x,line.a.y-line.b.y);
+T dist(Point<T> a, Point<T> b) {//计算两点之间的距离
+    return std::hypot(a.x - b.x, a.y - b.y);
+}
+
+template<class T>
+T dist(Line<T> line) {//计算直线的距离
+    return std::hypot(line.a.x - line.b.x, line.a.y - line.b.y);
 }
 
 template<class T>
 Point<T> rotate(Point<T> a) {//将一个点绕原点旋转 90 度（逆时针）
     return Point(-a.y, a.x);
 }
+
 //根据点的位置（相对于原点）返回一个符号值。如果点在 x 轴上方（或在 x 轴上但 y = 0 且 x > 0），则返回 1；否则返回 -1。
 template<class T>
 int sgn(Point<T> a) {
@@ -141,6 +170,47 @@ bool pointInPolygon(Point<T> a, std::vector<Point<T>> p) {//判断点 a 是否�
     }
 
     return t == 1;
+}
+
+template<class T>
+std::vector<Point<T>> Andrew(std::vector<Point<T>> p) {//求凸包
+    std::sort(p.begin(), p.end(), [&](Point<T> x, Point<T> y) {
+        return x.x != y.x ? x.x < y.x : x.y < y.y;
+    });
+    std::vector<Point<T>> stk;
+    int n = p.size();
+    for (int i = 0; i < n; i++) {
+        while (stk.size() > 1 && cross(stk.back() - stk[stk.size() - 2], p[i] - stk[stk.size() - 2]) <= 0)
+            stk.pop_back();
+        stk.push_back(p[i]);
+    }
+    int tmp = stk.size();
+    for (int i = n - 2; i >= 0; i--) {
+        while (stk.size() > tmp && cross(stk.back() - stk[stk.size() - 2], p[i] - stk[stk.size() - 2]) <= 0)
+            stk.pop_back();
+        stk.push_back(p[i]);
+    }
+    stk.pop_back();
+    return stk;
+}
+
+template<class T>
+std::pair<Point<T>, Point<T>> rotatingCalipers(std::vector<Point<T>> &p) {//旋转卡壳求最远点对距离
+    T res = 0;
+    std::pair<Point<T>, Point<T>> ans;
+    int n = p.size();
+    for (int i = 0, j = 1; i < n; i++) {
+        while (cross(p[i + 1] - p[i], p[j] - p[i]) < cross(p[i + 1] - p[i], p[j + 1] - p[i])) j = (j + 1) % n;
+        if (dist(p[i], p[j]) > res) {
+            ans = {p[i], p[j]};
+            res = dist(p[i], p[j]);
+        }
+        if (dist(p[i + 1], p[j]) > res) {
+            ans = {p[i + 1], p[j]};
+            res = dist(p[i + 1], p[j]);
+        }
+    }
+    return ans;
 }
 
 // 0 : not intersect不相交
@@ -296,7 +366,7 @@ std::vector<Point<T>> hp(std::vector<Line<T>> lines) {
 
     std::deque<Line<T>> ls;
     std::deque<Point<T>> ps;
-    for (auto l : lines) {
+    for (auto l: lines) {
         if (ls.empty()) {
             ls.push_back(l);
             continue;

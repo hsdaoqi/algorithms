@@ -9,7 +9,7 @@ struct CartesianTree {
         int par;
         std::array<T, 2> son;
 
-        Node(int idx, T val, int par) : idx(idx), val(val), par(par), son{} {}
+        Node(int idx = 0, T val = 0, int par = 0) : idx(idx), val(val), par(par), son{} {}
     };
 
     std::vector<Node> t;
@@ -19,13 +19,13 @@ struct CartesianTree {
     }
 
     void init(Compare comp = Compare()) {
-        t.assign(1, {});
+        t.assign(1, {0, 0, 0});
         t[0].son.fill(0);
         if (comp(-inf, inf)) t[0].val = -inf;
         else t[0].val = inf;
     }
 
-    void add(int idx, T val, int par) {
+    void add(int idx, T val, int par = 0) {
         t.emplace_back(idx, val, par);
     }
 
@@ -40,4 +40,10 @@ struct CartesianTree {
         }
         return t[0].son[1];
     }
+
+    int ls(int p) { return t[p].son[0]; }
+
+    int rs(int p) { return t[p].son[1]; }
+
+    int par(int p) { return t[p].par; }
 };

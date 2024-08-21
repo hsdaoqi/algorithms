@@ -54,11 +54,11 @@ struct Shortest_path {
             int u = pq.top().second;
             pq.pop();
             if (vis[u] >= 0) continue;
-            vis[u] = s == u ? u : -vis[u];
+            vis[u] = s == u ? u + 1 : -vis[u];
             for (auto [v, w]: adj[u]) {
                 if (dis[v] > 1ll * dis[u] + w) {
                     dis[v] = dis[u] + w;
-                    vis[v] = -u;
+                    vis[v] = -u - 1;
                     pq.emplace(dis[v], v);
                 }
             }
@@ -67,9 +67,9 @@ struct Shortest_path {
 
     std::tuple<bool, std::vector<int>> path(int t) {
         std::vector<int> path;
-        while (vis[t] != t) {
+        while (vis[t] - 1 != t) {
             path.emplace_back(t);
-            t = vis[t];
+            t = vis[t] - 1;
             if (t < 0) return {false, {}};
         }
         path.emplace_back(t);

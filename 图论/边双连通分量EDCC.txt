@@ -1,14 +1,14 @@
 //无向图中极大的不包含割边的连通块被称为边双联通分量
 
 struct EDCC {
-    int n;
+    int n{};
     std::vector<std::vector<std::pair<int, int>>> adj;
     std::vector<std::vector<int>> ndcc;
-    std::vector<std::pair<int, int>> bri;
+    std::vector<std::tuple<int, int, int>> bri;
     std::vector<int> dfn, low, stk, bel;
-    int cnt, cur, idx;
+    int cnt{}, cur{}, idx{};
 
-    EDCC() {};
+    EDCC() = default;
 
     EDCC(int _n) : n(_n) {
         Init(_n);
@@ -25,8 +25,8 @@ struct EDCC {
 
     void addEdge(int u, int v) {
         idx++;
-        adj[u].push_back({v, idx});
-        adj[v].push_back({u, idx});
+        adj[u].emplace_back(v, idx);
+        adj[v].emplace_back(u, idx);
     }
 
     void dfs(int x, int fid) {
@@ -37,7 +37,7 @@ struct EDCC {
                 dfs(y, id);
                 low[x] = std::min(low[x], low[y]);
                 if (low[y] > dfn[x]) {
-                    bri.emplace_back(x, y);
+                    bri.emplace_back(x, y, id);
                 }
             } else if (id != fid) {
                 low[x] = std::min(low[x], dfn[y]);
