@@ -1,23 +1,30 @@
+
 struct Trie {
     struct node {
-        array<int,26> son;
-        int cnt=0;
-        node():son{} {}
+        std::array<int, 26> son;
+        int cnt = 0;
+
+        node() : son{} {}
     };
+
     std::vector<node> t;
-    Trie(){
+
+    Trie() {
         init();
     }
-    void init(){
-        t.assign(1,node());
+
+    void init() {
+        t.assign(1, node());
     }
-    int newnode(){
+
+    int newnode() {
         t.emplace_back();
-        return t.size()-1;
+        return t.size() - 1;
     }
-    void insert(const string &val) {
+
+    void insert(const std::string &val) {
         int p = 0;
-        for (char c:val) {
+        for (char c: val) {
             int ne = c - 'a';
             if (t[p].son[ne] == 0) {
                 t[p].son[ne] = newnode();
@@ -27,14 +34,14 @@ struct Trie {
         t[p].cnt++;
     }
 
-    int query(const string &val) {
+    int query(const std::string &val) {
         int p = 0;
-        for(char c:val){
-            int ne=c-'a';
-            if(t[p].son[ne]==0){
+        for (char c: val) {
+            int ne = c - 'a';
+            if (t[p].son[ne] == 0) {
                 return 0;
             }
-            p=t[p].son[ne];
+            p = t[p].son[ne];
         }
         return t[p].cnt;
     }
