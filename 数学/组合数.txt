@@ -1,6 +1,4 @@
 //用逆元求组合数
-
-~~~cpp
 template<typename T>
 struct Comb {
     //大质数-->1999999999999999909

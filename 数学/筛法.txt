@@ -19,6 +19,24 @@ void sieve(int n) {
     }
 }
 
+//区间素数筛
+std::vector<int> prime;
+
+void Interval(int l, int r) {
+    sieve(1e5);
+    if (l == 1) l++;
+    std::vector<int> a(r - l + 1);
+    for (i64 p: primes) {
+        i64 st = std::max(2ll, (l - 1) / p + 1) * p;
+        for (i64 i = st; i <= r; i += p) {
+            if (i - l >= 0) a[i - l] = 1;
+        }
+    }
+    for (int i = 0; i <= r - l; i++) {
+        if (!a[i]) prime.push_back(i + l);
+    }
+}
+
 //欧拉函数
 //试除法
 int phi(int x){
@@ -153,22 +171,24 @@ void factors(int n){
 
 
 //筛法莫比乌斯函数
-std::vector<int> minp,primes,mu;
-void Mobius(int n){
-    mu.resize(n+1),minp.resize(n+1);
+std::vector<int> minp, primes, mu;
+
+void Mobius(int n) {
+    mu.resize(n + 1), minp.resize(n + 1);
     mu[1] = 1;
-    for(int i=2;i<=n;i++){
-        if(!minp[i]){
+    for (int i = 2; i <= n; i++) {
+        if (!minp[i]) {
             primes.push_back(i);
-            minp[i]=i,mu[i]=-1;
+            minp[i] = i, mu[i] = -1;
         }
-        for(int &p:primes){
-            if(i*p>n) break;
-            if(i%p==0){
-                mu[i*p]=0;
+        for (int &p: primes) {
+            if (i * p > n) break;
+            minp[i * p] = p;
+            if (i % p == 0) {
+                mu[i * p] = 0;
                 break;
-            }else{
-                mu[i*p]=-mu[i];
+            } else {
+                mu[i * p] = -mu[i];
             }
         }
     }

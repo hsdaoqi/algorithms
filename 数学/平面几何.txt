@@ -63,6 +63,11 @@ struct Point {
     }
 };
 
+//角度转弧度
+long double change(l64 d) {
+    return acos(-1.0) / 180 * d;
+}
+
 template<class T>
 T dot(Point<T> a, Point<T> b) {//计算两个点之间的点积。
     return a.x * b.x + a.y * b.y;
@@ -122,8 +127,9 @@ T dist(Line<T> line) {//计算直线的距离
 }
 
 template<class T>
-Point<T> rotate(Point<T> a) {//将一个点绕原点旋转 90 度（逆时针）
-    return Point(-a.y, a.x);
+Point<T> rotate(Point<T> a, l64 d = 90) {//将一个点绕原点旋转 d 度（逆时针）
+    d = change(d);
+    return Point(a.x * std::cos(d) - std::sin(d) * a.y, std::sin(d) * a.x + std::cos(d) * a.y);
 }
 
 //根据点的位置（相对于原点）返回一个符号值。如果点在 x 轴上方（或在 x 轴上但 y = 0 且 x > 0），则返回 1；否则返回 -1。
@@ -201,13 +207,13 @@ std::pair<Point<T>, Point<T>> rotatingCalipers(std::vector<Point<T>> &p) {//旋�
     int n = p.size();
     for (int i = 0, j = 1; i < n; i++) {
         while (cross(p[i + 1] - p[i], p[j] - p[i]) < cross(p[i + 1] - p[i], p[j + 1] - p[i])) j = (j + 1) % n;
-        if (dist(p[i], p[j]) > res) {
+        if (square(p[i] - p[j]) > res) {
             ans = {p[i], p[j]};
-            res = dist(p[i], p[j]);
+            res = square(p[i] - p[j]);
         }
-        if (dist(p[i + 1], p[j]) > res) {
+        if (square(p[i + 1] - p[j]) > res) {
             ans = {p[i + 1], p[j]};
-            res = dist(p[i + 1], p[j]);
+            res = square(p[i + 1] - p[j]);
         }
     }
     return ans;
@@ -408,4 +414,100 @@ std::vector<Point<T>> hp(std::vector<Line<T>> lines) {
     ps.push_back(lineIntersection(ls[0], ls.back()));
 
     return std::vector(ps.begin(), ps.end());
+}
+
+//计算覆盖所有点的矩形的最小面积
+template<class T>
+T MinRectangeCover(std::vector<Point<T>> P) {
+    int n = P.size();
+    if (n < 3) return 0;
+    P.push_back(P[0]);
+    T ans = std::numeric_limits<T>::max();
+    for (int i = 0, r = 1, p = 1, q; i < n; i++) {
+        while (cross(P[i + 1] - P[i], P[r] - P[i]) < cross(P[i + 1] - P[i], P[r + 1] - P[i])) r = (r + 1) % n;
+        while (dot(P[i + 1] - P[i], P[p] - P[i]) <= dot(P[i + 1] - P[i], P[p + 1] - P[i])) p = (p + 1) % n;
+        if (i == 0) q = p;
+        while (dot(P[i + 1] - P[i], P[q] - P[i]) >= dot(P[i + 1] - P[i], P[q + 1] - P[i])) q = (q + 1) % n;
+        T d = square(P[i] - P[i + 1]);
+        T tmp = cross(P[i + 1] - P[i], P[r] - P[i]) / d *
+                (dot(P[i + 1] - P[i], P[p] - P[i]) - dot(P[i + 1] - P[i], P[q] - P[i]));
+        if (ans > tmp) ans = tmp;
+    }
+    return ans;
+}
+
+//计算两个凸包之间的最短距离
+template<class T>
+T caliper(std::vector<Point<T>> a, std::vector<Point<T>> b) {
+    auto calc = [&](std::vector<Point<T>> &p1, std::vector<Point<T>> &p2) {
+        int n = p1.size()-1, m = p2.size()-1;
+        int mn = 0, mx = 0;
+        for (int i = 0; i < n; i++) if (p1[mn].y > p1[i].y) mn = i;
+        for (int i = 0; i < m; i++) if (p2[mx].y < p2[i].y) mx = i;
+        T ans = std::numeric_limits<T>::max();
+        for (int i = 0; i < n; i++) {
+            while (cross(p1[mn + 1] - p1[mn], p2[mx + 1] - p1[mn]) > cross(p1[mn + 1] - p1[mn], p2[mx] - p1[mn]))
+                mx = (mx + 1) % m;
+            ans = std::min({ans, dist(p1[mn], Line{p2[mx], p2[mx + 1]}), dist(p1[mn + 1], Line{p2[mx], p2[mx + 1]}),
+                            dist(p2[mx], Line{p1[mn], p1[mn + 1]}), dist(p2[mx + 1], Line{p1[mn], p1[mn + 1]})});
+            mn = (mn + 1) % n;
+        }
+        return ans;
+    };
+    a.push_back(a[0]);
+    b.push_back(b[0]);
+    return std::min(calc(a, b), calc(b, a));
+}
+
+//从平面的点组成的三角形面积的最小最大值(n^2log)
+template<class T>
+std::pair<T, T> minmaxTriangle(std::vector<Point<T>> p) {
+    if (p.size() <= 2) return {0, 0};
+    std::vector<std::pair<int, int>> evt;
+    evt.reserve(p.size() * p.size());
+    T t = std::abs(cross(p[0] - p[1], p[0] - p[2]));
+    T min = t, max = t;
+    for (int i = 0; i < p.size(); i++) {
+        for (int j = 0; j < p.size(); j++) {
+            if (i == j || p[i] == p[j]) continue;
+            evt.emplace_back(i, j);
+        }
+    }
+    auto cmp = [&](Point<T> x, Point<T> y) -> bool {
+        auto calc = [&](Point<T> tmp) {
+            if (tmp.y < 0) return 1;
+            if (tmp.y > 0) return 4;
+            if (tmp.x < 0) return 5;
+            if (tmp.x > 0) return 3;
+            return 2;
+        };
+        int t1 = calc(x), t2 = calc(y);
+        if (t1 != t2) return t1 < t2;
+        T t = cross(x, y);
+        return t > 0;
+    };
+    std::sort(evt.begin(), evt.end(), [&](auto x, auto y) {
+        Point<T> du = p[x.second] - p[x.first], dv = p[y.second] - p[y.first];
+        std::swap(du.x, du.y), std::swap(dv.y, dv.x);
+        du.x *= -1, dv.x *= -1;
+        return cmp(du, dv);
+    });
+    std::vector<int> vx(p.size()), pos(p.size());
+    for (int i = 0; i < p.size(); i++) vx[i] = i;
+    std::sort(vx.begin(), vx.end(), [&](int x, int y) {
+        return p[x].x == p[y].x ? p[x].y < p[y].y : p[x].x < p[y].x;
+    });
+    for (int i = 0; i < vx.size(); i++) pos[vx[i]] = i;
+    for (auto [u, v]: evt) {
+        int i = pos[u], j = pos[v];
+        if (i > j) std::swap(u, v), std::swap(i, j);
+        Point<T> pu = p[u], pv = p[v];
+        if (i > 0) min = std::min(min, std::abs(cross(p[vx[i - 1]] - pu, p[vx[i - 1]] - pv)));
+        if (j < vx.size() - 1) min = std::min(min, std::abs(cross(p[vx[j + 1]] - pu, p[vx[j + 1]] - pv)));
+        max = std::max({max, std::abs(cross(p[vx[0]] - pu, p[vx[0]] - pv)),
+                        std::abs(cross(p[vx.back()] - pu, p[vx.back()] - pv))});
+        std::swap(vx[i], vx[j]);
+        pos[u] = j, pos[v] = i;
+    }
+    return {min, max};
 }

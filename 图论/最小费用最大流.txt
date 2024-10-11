@@ -1,72 +1,80 @@
 template<class T>
-struct MinCostFlow{
+struct MinCostFlow {
     int n;
-    struct Edge{
+
+    struct Edge {
         int to;
-        T cap,cost;
-        Edge(int to,T cap,T cost):to(to),cap(cap),cost(cost){}
+        T cap, cost;
+
+        Edge(int to, T cap, T cost) : to(to), cap(cap), cost(cost) {}
     };
-    vector<Edge> e;
-    vector<vector<int>> h;
-    vector<T> c,dis;
-    vector<int> pre;
-    MinCostFlow(){};
-    MinCostFlow(int _n){
+
+    std::vector<Edge> e;
+    std::vector<std::vector<int>> h;
+    std::vector<T> c, dis;
+    std::vector<int> pre;
+
+    MinCostFlow() {};
+
+    MinCostFlow(int _n) {
         init(_n);
     }
-    void init(int _n){
-        n=_n;
+
+    void init(int _n) {
+        n = _n;
         e.clear();
-        h.assign(n,{});
-    }
-    void addEdge(int u,int v,T cap,T cost){
-        h[u].push_back(e.size());
-        e.emplace_back(v,cap, cost);
-        h[v].push_back(e.size());
-        e.emplace_back(u,0,-cost);
+        h.assign(n, {});
     }
 
-    bool dijkstra(int s,int t){
-        dis.assign(n,numeric_limits<T>::max());
-        pre.assign(n,-1);
-        priority_queue<pair<T,int>,vector<pair<T,int>>,greater<pair<T,int>>> pq;
-        dis[s]=0,pq.emplace(0,s);
-        while(!pq.empty()){
-            auto [d,u]=pq.top();
+    void addEdge(int u, int v, T cap, T cost) {
+        h[u].push_back(e.size());
+        e.emplace_back(v, cap, cost);
+        h[v].push_back(e.size());
+        e.emplace_back(u, 0, -cost);
+    }
+
+    bool dijkstra(int s, int t) {
+        dis.assign(n, std::numeric_limits<T>::max());
+        pre.assign(n, -1);
+        std::priority_queue<std::pair<T, int>, std::vector<std::pair<T, int >>, std::greater<std::pair<T, int>>> pq;
+        dis[s] = 0, pq.emplace(0, s);
+        while (!pq.empty()) {
+            auto [d, u] = pq.top();
             pq.pop();
-            if(dis[u]!=d){
+            if (dis[u] != d) {
                 continue;
             }
-            for(int i:h[u]){
-                auto [v,cap,cost]=e[i];
-                if(cap>0&&dis[v]>d+c[u]-c[v]+cost){
-                    dis[v]=d+c[u]-c[v]+cost;
-                    pre[v]=i;
-                    pq.emplace(dis[v],v);
+            for (int i: h[u]) {
+                auto [v, cap, cost] = e[i];
+                if (cap > 0 && dis[v] > d + c[u] - c[v] + cost) {
+                    dis[v] = d + c[u] - c[v] + cost;
+                    pre[v] = i;
+                    pq.emplace(dis[v], v);
                 }
             }
         }
-        return dis[t]!=numeric_limits<T>::max();
+        return dis[t] != std::numeric_limits<T>::max();
     }
-    pair<T,T> flow(int s,int t){
-        T flow=0,cost=0;
-        c.assign(n,0);
-        while(dijkstra(s,t)){
-            for(int i=0;i<n;i++){
-                c[i]+=dis[i];
+
+    std::pair<T, T> flow(int s, int t) {
+        T flow = 0, cost = 0;
+        c.assign(n, 0);
+        while (dijkstra(s, t)) {
+            for (int i = 0; i < n; i++) {
+                c[i] += dis[i];
             }
-            T aug=numeric_limits<int>::max();
-            for(int i=t;i!=s;i=e[pre[i]^1].to){
-                aug=min(aug,e[pre[i]].cap);
+            T aug = std::numeric_limits<int>::max();
+            for (int i = t; i != s; i = e[pre[i] ^ 1].to) {
+                aug = std::min(aug, e[pre[i]].cap);
             }
-            for(int i=t;i!=s;i=e[pre[i]^1].to){
-                e[pre[i]].cap-=aug;
-                e[pre[i]^1].cap+=aug;
+            for (int i = t; i != s; i = e[pre[i] ^ 1].to) {
+                e[pre[i]].cap -= aug;
+                e[pre[i] ^ 1].cap += aug;
             }
-            flow+=aug;
-            cost+=aug*c[t];
+            flow += aug;
+            cost += aug * c[t];
         }
-        return make_pair(flow, cost);
+        return std::make_pair(flow, cost);
     }
 
     struct _Edge {
@@ -76,6 +84,7 @@ struct MinCostFlow{
         T cost;
         T flow;
     };
+
     std::vector<_Edge> edges() {
         std::vector<_Edge> a;
         for (int i = 0; i < e.size(); i += 2) {

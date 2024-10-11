@@ -1,12 +1,12 @@
 template<typename T>
 struct TWOCRT {//中国剩余定理&扩展中国剩余定理
-    vector<T> m,r;
+    std::vector<T> m,r;
     TWOCRT(){};
     TWOCRT(T n){
         m.resize(n+1);
         r.resize(n+1);
     };
-    TWOCRT(vector<T> _m,vector<T> _r){
+    TWOCRT(std::vector<T> _m,std::vector<T> _r){
         m=_m;
         r=_r;
     }
