@@ -3,9 +3,13 @@ struct Bign {
 
     Bign() = default;
 
+    Bign(const Bign &rhs) : a(rhs.a) {}
+
+    Bign(const long long &rhs) : a(std::to_string(rhs)) {}
+
     bool operator==(const Bign &rhs) const { return a == rhs.a; }
 
-    bool operator==(const int &rhs) const { return a == std::to_string(rhs); }
+    bool operator==(const long long &rhs) const { return a == std::to_string(rhs); }
 
     bool operator>(const Bign &rhs) {
         if (*this == rhs) return false;
@@ -28,7 +32,7 @@ struct Bign {
 
     bool operator<=(const Bign &rhs) { return *this == rhs || *this < rhs; }
 
-    Bign operator=(const int &rhs) {
+    Bign operator=(const long long &rhs) {
         a = std::to_string(rhs);
         return *this;
     }
@@ -146,6 +150,13 @@ struct Bign {
             ans.a += cB(lhs.a, rhs.a);
         } else if (fa) ans.a = "-" + cA(s, rhs.a);
         else ans.a = cA(lhs.a, t);
+        fa = (ans.a[0] == '-');
+        for (int i = fa; i < ans.a.size(); i++) {
+            if (ans.a[i] != '0' || i == ans.a.size() - 1) {
+                ans.a = (fa ? "-" : "") + ans.a.substr(i);
+                break;
+            }
+        }
         if (ans.a == "-0") ans.a = '0';
         return ans;
     }
@@ -178,6 +189,7 @@ struct Bign {
         while (c.back() == 0 && c.size() > 2) c.pop_back();
         if (f == -1) ans.a += '-';
         for (int i = c.size() - 1; i >= 1; i--) ans.a += c[i] + '0';
+
         if (ans.a == "-0") ans.a = "0";
         return ans;
     }
@@ -289,6 +301,14 @@ struct Bign {
 
     friend std::istream &operator>>(std::istream &in, Bign &x) {
         in >> x.a;
+        bool fa = (x.a[0] == '-');
+        for (int i = fa; i < x.a.size(); i++) {
+            if (x.a[i] != '0' || i == x.a.size() - 1) {
+                x.a = (fa ? "-" : "") + x.a.substr(i);
+                break;
+            }
+        }
+        if (x.a == "-0") x.a = "0";
         return in;
     }
 
