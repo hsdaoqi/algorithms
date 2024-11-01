@@ -54,6 +54,10 @@ struct Point {
         return a.x == b.x && a.y == b.y;
     }
 
+    friend bool operator<(Point a, Point b) {
+        return a.x < b.x || (a.x == b.x && a.y < b.y);
+    }
+
     friend std::istream &operator>>(std::istream &is, Point &p) {
         return is >> p.x >> p.y;
     }
@@ -183,6 +187,7 @@ std::vector<Point<T>> Andrew(std::vector<Point<T>> p) {//求凸包
     std::sort(p.begin(), p.end(), [&](Point<T> x, Point<T> y) {
         return x.x != y.x ? x.x < y.x : x.y < y.y;
     });
+    if (p.size() <= 2) return p;
     std::vector<Point<T>> stk;
     int n = p.size();
     for (int i = 0; i < n; i++) {
@@ -440,7 +445,7 @@ T MinRectangeCover(std::vector<Point<T>> P) {
 template<class T>
 T caliper(std::vector<Point<T>> a, std::vector<Point<T>> b) {
     auto calc = [&](std::vector<Point<T>> &p1, std::vector<Point<T>> &p2) {
-        int n = p1.size()-1, m = p2.size()-1;
+        int n = p1.size() - 1, m = p2.size() - 1;
         int mn = 0, mx = 0;
         for (int i = 0; i < n; i++) if (p1[mn].y > p1[i].y) mn = i;
         for (int i = 0; i < m; i++) if (p2[mx].y < p2[i].y) mx = i;
@@ -510,4 +515,20 @@ std::pair<T, T> minmaxTriangle(std::vector<Point<T>> p) {
         pos[u] = j, pos[v] = i;
     }
     return {min, max};
+}
+
+template<class T>
+T PolygonArea(std::vector<Point<T>> p) {
+    int n = p.size();
+    if (n < 3) return 0;
+    T s = p[0].y * (p[n - 1].x - p[1].x);
+    for (int i = 1; i < n; i++) {
+        s += p[i].y * (p[i - 1].x - p[(i + 1) % n].x);
+    }
+    return std::abs(s / 2);
+}
+
+template<class T>
+T TriangleArea(Point<T> p1, Point<T> p2, Point<T> p3) {
+    return std::abs(cross(p2 - p1, p3 - p1) / 2);
 }
