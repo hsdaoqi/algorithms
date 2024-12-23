@@ -1,3 +1,4 @@
+using i64 = long long;
 using l64 = long double;
 
 template<class T>
@@ -117,7 +118,7 @@ T dist(Point<T> p, Line<T> line) {// 计算点道线段的距离
     if (dot(p1, p2) < 0) return length(p2);
     if (dot(p1, p3) > 0) return length(p3);
 
-    return fabs(cross(line.b - line.a, p - line.a) / length(line.b - line.a));
+    return std::abs(cross(line.b - line.a, p - line.a) / length(line.b - line.a));
 }
 
 template<class T>
@@ -126,8 +127,36 @@ T dist(Point<T> a, Point<T> b) {//计算两点之间的距离
 }
 
 template<class T>
+T dist2(Point<T> a, Point<T> b) {//计算两点之间距离的平方
+    return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+}
+
+template<class T>
 T dist(Line<T> line) {//计算直线的距离
     return std::hypot(line.a.x - line.b.x, line.a.y - line.b.y);
+}
+
+template<class T>
+T PointToLine(Point<T> p, Line<T> l) { //点到直线的距离
+    return std::abs(cross(p - l.a, l.b - l.a) / dist(l));
+}
+
+template<class T>
+Point<T> shadowPointToLine(Point<T> p, Line<T> line) {//点在直线上的投影
+    Point<T> v = line.b - line.a, u = p - line.a;
+    return line.a + v * (dot(v, u) / square(v));
+}
+
+template<class T>
+Point<T> PointToSegment(Point<T> p, Line<T> l) {//线端上距离点最近的点
+    l64 mn = dist(p, l);
+    l64 d1 = dist(p, l.a), d2 = dist(p, l.b);
+    if (d1 == mn) {
+        return l.a;
+    } else if (d2 == mn) {
+        return l.b;
+    }
+    return shadowPointToLine(p, l);
 }
 
 template<class T>
@@ -145,6 +174,11 @@ int sgn(Point<T> a) {
 template<class T>
 bool pointOnLineLeft(Point<T> p, Line<T> l) {//判断点 p 是否在线段 l 的左侧（不包括线段上）。
     return cross(l.b - l.a, p - l.a) > 0;
+}
+
+template<class T>
+bool pointOnLineRight(Point<T> p, Line<T> l) {//判断点 p 是否在线段 l 的左侧（不包括线段上）。
+    return cross(l.b - l.a, p - l.a) < 0;
 }
 
 template<class T>
@@ -531,4 +565,44 @@ T PolygonArea(std::vector<Point<T>> p) {
 template<class T>
 T TriangleArea(Point<T> p1, Point<T> p2, Point<T> p3) {
     return std::abs(cross(p2 - p1, p3 - p1) / 2);
+}
+
+template<class T>
+std::pair<Point<T>, Point<T>> nearestPoint(std::vector<Point<T>> &p) {
+    std::sort(p.begin(), p.end());
+    std::pair<Point<T>, Point<T>> ans;
+    T d = std::numeric_limits<T>::max();
+    std::vector<Point<T>> tmp;
+    std::function<T(int, int)> dfs = [&](int l, int r) -> T {
+        if (l == r) return std::numeric_limits<T>::max();
+        if (l + 1 == r) {
+            T d1 = dist2(p[l], p[r]);
+            if (d1 < d) {
+                ans = {p[l], p[r]},d = d1;
+            }
+            return d1;
+        }
+        int m = (l + r) >> 1;
+        T d1 = std::min(dfs(l, m), dfs(m + 1, r));
+        tmp.clear();
+        for (int i = l; i <= r; i++) {
+            if (std::abs(p[i].x - p[m].x) < d) tmp.emplace_back(p[i]);
+        }
+        std::sort(tmp.begin(), tmp.end(), [&](auto x, auto y) {
+            return x.y < y.y;
+        });
+        for (int i = 0; i < tmp.size(); i++) {
+            for (int j = i + 1; j < tmp.size() && tmp[j].y - tmp[i].y < d; j++) {
+                if (dist2(tmp[i], tmp[j]) < d1) {
+                    d1 = dist2(tmp[i], tmp[j]);
+                    if (d > d1) {
+                        d = d1, ans = {tmp[i], tmp[j]};
+                    }
+                }
+            }
+        }
+        return d1;
+    };
+    dfs(0, p.size() - 1);
+    return ans;
 }

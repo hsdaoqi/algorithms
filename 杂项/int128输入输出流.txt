@@ -1,11 +1,11 @@
 using i128 = __int128;
+
 // 重载输入运算符以支持__int128类型
 std::istream &operator>>(std::istream &is, __int128 &val) {
-    std::string str;is >> str; val = 0;
-    bool neg = false;
-    if (str[0] == '-') neg = true, str = str.substr(1);
-    for (char &c: str) val = val * 10 + c - '0';
-    if (neg) val = -val;
+    std::string s;
+    is >> s, val = 0;
+    if (s[0] == '-') val = std::stoi(s.substr(0, 2)), s = s.substr(2);
+    for (char &c: s) val = val * 10 + c - '0';
     return is;
 }
 
