@@ -120,12 +120,16 @@ struct SegmentTree {
         return findLast(1, 1, n, l, r, pred);
     }
 };
+
 constexpr int inf = 2000;
+
 struct Info {
     int pre, suf, sum, res;
-    Info(int s = -inf): pre(s), suf(s), sum(s), res(s) {}
+
+    Info(int s = -inf) : pre(s), suf(s), sum(s), res(s) {}
 };
-Info operator+(Info a, Info b) {
+
+Info operator+(const Info &a, const Info &b) {
     Info c;
     c.sum = a.sum + b.sum;
     c.pre = std::max(a.pre, a.sum + b.pre);
