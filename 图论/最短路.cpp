@@ -18,7 +18,7 @@ struct Shortest_path {
     T inf;
     std::vector<T> dis, cnt;
     std::vector<std::vector<T>> d;
-    std::vector<std::vector<std::pair<int, T>>> adj;
+    std::vector<std::vector<std::pair<int, T>>> adj, e;
     std::vector<int> vis;
     std::priority_queue<std::pair<T, int>, std::vector<std::pair<T, int>>, std::greater<>> pq;
 
@@ -123,13 +123,16 @@ struct Shortest_path {
 
     T K_th(int s, int t, int k) {//使用A*算法
         fill(cnt.begin(), cnt.end(), 0);
-        std::vector<std::vector<std::pair<int, T>>> e(n);
-        for (int i = 1; i < n; i++) {
-            for (auto [v, w]: adj[i]) {
-                e[v].emplace_back(i, w);
+        if (e.empty()) {
+            e.assign(n, {});
+            for (int i = 1; i < n; i++) {
+                for (auto [v, w]: adj[i]) {
+                    e[v].emplace_back(i, w);
+                }
             }
+            std::swap(e, adj);
+            dijkstra(t);
         }
-        dijkstra(t);
         if (s == t) k++;
         std::priority_queue<std::tuple<T, int, T>, std::vector<std::tuple<T, int, T>>, std::greater<>> q;//总长,u,已有的w
         q.emplace(dis[s], s, 0);
