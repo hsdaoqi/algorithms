@@ -1,4 +1,4 @@
-template<typename T, typename Compare=std::less<std::tuple<T, int, int>>>
+template<typename T, typename Compare=std::less<>>
 struct MST {
     int n;
     std::vector<std::vector<int>> adj;
@@ -62,8 +62,8 @@ struct MST {
 
     void dfs(int u) {
         if (f.empty()) {
-            f.assign(u + 1, {});
-            dep.assign(u + 1, 1);
+            f.assign(adj.size(), {});
+            dep.assign(adj.size(), 1);
         }
         for (int i = 1; i <= std::__lg(dep[u]); i++) {
             f[u][i] = f[f[u][i - 1]][i - 1];
@@ -73,6 +73,14 @@ struct MST {
             dep[v] = dep[u] + 1;
             f[v][0] = u;
             dfs(v);
+        }
+    }
+
+    void work() {
+        for (int i = 1; i < fa.size(); i++) {
+            if (fa[i] == i) {
+                dfs(i);
+            }
         }
     }
 
