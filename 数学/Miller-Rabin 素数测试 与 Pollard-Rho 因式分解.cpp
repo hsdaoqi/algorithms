@@ -1,27 +1,25 @@
-//Miller-Rabin素数测试与Pollard-Rho因式分解
 i64 mul(i64 a, i64 b, i64 m) {
     return static_cast<__int128>(a) * b % m;
 }
+
 i64 power(i64 a, i64 b, i64 m) {
     i64 res = 1 % m;
-    for (; b; b >>= 1, a = mul(a, a, m))
-        if (b & 1)
-            res = mul(res, a, m);
+    for (; b; b >>= 1, a = mul(a, a, m)) {
+        if (b & 1) res = mul(res, a, m);
+    }
     return res;
 }
-//快速判断一个数是不是质数O(T*log(n)),T=50左右
+
+//Miller-Rabin素数测试
 bool isprime(i64 n) {
-    if (n < 2)
-        return false;
+    if (n < 2) return false;
     static constexpr int A[] = {2, 3, 5, 7, 11, 13, 17, 19, 23};
     int s = __builtin_ctzll(n - 1);
     i64 d = (n - 1) >> s;
-    for (auto a : A) {
-        if (a == n)
-            return true;
+    for (auto a: A) {
+        if (a == n) return true;
         i64 x = power(a, d, n);
-        if (x == 1 || x == n - 1)
-            continue;
+        if (x == 1 || x == n - 1) continue;
         bool ok = false;
         for (int i = 0; i < s - 1; ++i) {
             x = mul(x, x, n);
@@ -30,15 +28,18 @@ bool isprime(i64 n) {
                 break;
             }
         }
-        if (!ok)
-            return false;
+        if (!ok) return false;
     }
     return true;
 }
-//快速求一个数的所有质因子
+
+//Pollard-Rho因式分解
 std::vector<i64> factorize(i64 n) {
     std::vector<i64> p;
+    static std::mt19937_64 rng(std::chrono::system_clock::now().time_since_epoch().count());
+    std::uniform_int_distribution<i64> dis(1, n - 1);
     std::function<void(i64)> f = [&](i64 n) {
+        i64 c = dis(rng);
         if (n <= 10000) {
             for (int i = 2; i * i <= n; ++i)
                 for (; n % i == 0; n /= i)
@@ -52,7 +53,7 @@ std::vector<i64> factorize(i64 n) {
             return;
         }
         auto g = [&](i64 x) {
-            return (mul(x, x, n) + 1) % n;
+            return (mul(x, x, n) + c) % n;
         };
         i64 x0 = 2;
         while (true) {

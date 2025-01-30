@@ -6,13 +6,12 @@
 //再构造通解X=x0+(b*k)/gcd(a,b),Y=y0-(a*k)/gcd(a,b)
 //最小正整数解Xmin == (x0%(b/g)+(b/g))%(b/g) ,Ymin=(y0%(a/g)+(a/g))%(a/g)
 
-int exgcd(int a,int b,int &x,int &y){
-    if(b==0){
-        x=1,y=0;
+i64 exgcd(i64 a, i64 b, i64 &x, i64 &y) {
+    if (b == 0) {
+        x = 1, y = 0;
         return a;
     }
-
-    int gcd=exgcd(b,a%b,y,x);
-    y-=(a/b)*x;
+    i64 gcd = exgcd(b, a % b, y, x);
+    y -= (a / b) * x;
     return gcd;
 }

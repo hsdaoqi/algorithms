@@ -64,7 +64,7 @@ void Phi(int n) {
         for (auto &p: primes) {
             if (i * p > n) break;
             minp[i * p] = p;
-            if (i % p == 0) {
+            if (minp[i] == p) {
                 phi[i * p] = phi[i] * p;
                 break;
             } else {
@@ -73,25 +73,26 @@ void Phi(int n) {
         }
     }
 }
-
 //筛法求有几种质因子
-std::vector<int> minp,fac,primes;
-void prime_fac(int n){
-    minp.resize(n+1);fac.resize(n+1);
-    for(int i=2;i<=n;i++){
-        if(minp[i]==0){
-            minp[i]=i;
-            fac[i]=1;
+std::vector<int> minp, fac, primes;
+
+void sieve(int n) {
+    minp.resize(n + 1);
+    fac.resize(n + 1);
+    for (int i = 2; i <= n; i++) {
+        if (minp[i] == 0) {
+            minp[i] = i;
+            fac[i] = 1;
             primes.push_back(i);
         }
-        for(int p:primes){
-            if(i*p>n) break;
-            minp[i*p]=p;
-            if(i%p==0){
-                fac[i*p]=fac[i];
+        for (int p: primes) {
+            if (i * p > n) break;
+            minp[i * p] = p;
+            if (i % p == 0) {
+                fac[i * p] = fac[i];
                 break;
-            }else{
-                fac[i*p]=fac[i]+1;
+            } else {
+                fac[i * p] = fac[i] + 1;
             }
         }
     }
