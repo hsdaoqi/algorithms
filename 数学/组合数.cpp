@@ -1,64 +1,84 @@
-//用逆元求组合数
+/*
+ * 组合数(Comb)
+ * */
 template<typename T>
 struct Comb {
     //大质数-->1999999999999999909
-    T mod = 1e9+7;
-    std::vector<T> fav, inv;
+    T mod = 1e9 + 7;
+    int n = 0;
+    std::vector<T> _fac, _inv, _invfac;
 
-    Comb() {
-        Init((int) 1e6);
+    Comb() : n{0}, _fac{1}, _invfac{1}, _inv{0} {}
+
+    explicit Comb(int n) : Comb() {
+        init(n);
     }
 
-    Comb(T n) {
-        Init(n);
-    }
-
-    T power(T a, T b, T p) {
-        a %= p;
+    T power(T a, i64 b) {
         T ans = 1;
-        while (b) {
-            if (b & 1) ans = (ans * a) % p;
-            a = (a * a) % p;
-            b >>= 1;
+        for (; b; b >>= 1, a = a * a % mod) {
+            if (b & 1) ans = ans * a % mod;
         }
         return ans;
     }
 
-    //Cnm=n!/((n-m)!*m!)
-    void Init(T n) {
-        fav.resize(n + 5);
-        inv.resize(n + 5);
-        fav[0] = inv[0] = 1;
-        for (int i = 1; i <= n; i++) {
-            fav[i] = fav[i - 1] * i % mod;//求n的阶乘
+    void init(int m) {
+        if (m <= n) return;
+        _fac.resize(m + 1);
+        _inv.resize(m + 1);
+        _invfac.resize(m + 1);
+        _fac[0] = _inv[0] = _invfac[0] = 1;
+        for (int i = n + 1; i <= m; i++) {
+            _fac[i] = _fac[i - 1] * i % mod;
         }
-        inv[n] = power(fav[n], mod - 2, mod);
-        for (int i = n; i > 0; i--) {
-            inv[i - 1] = inv[i] * i % mod;//求n的阶乘的逆元
+        _invfac[m] = power(_fac[m], mod - 2);
+        for (int i = m; i > n; i--) {
+            _invfac[i - 1] = _invfac[i] * i % mod;
+            _inv[i] = _invfac[i] * _fac[i - 1] % mod;
         }
+        n = m;
     }
 
-    T C(T n, T m) {
-        if (n < 0 || m < 0 || n < m) return 0;
-        return fav[n] * inv[m] % mod * inv[n - m] % mod;
+    T sub(T a, T b) {
+        return ((a - b) % mod + mod) % mod;
     }
 
-    T A(T n, T m) {
-        if (n < 0 || m < 0 || n < m) return 0;
-        return (fav[n] * inv[n - m]) % mod;
+    T fac(int m) {
+        if (m > n) init(m);
+        return _fac[m];
     }
 
-    T lucas(T n, T m) {
+    T invfac(int m) {
+        if (m > n) init(m);
+        return _invfac[m];
+    }
+
+    T inv(int m) {
+        if (m > n) init(m);
+        return _inv[m];
+    }
+
+    T binom(int _n, int m) {
+        if (_n < 0 || m < 0 || _n < m) return 0;
+        return fac(_n) * invfac(m) % mod * invfac(_n - m) % mod;
+    }
+
+    T perm(int _n, int m) {
+        if (_n < 0 || m < 0 || _n < m) return 0;
+        return fac(_n) * invfac(_n - m) % mod;
+    }
+
+    T lucas(i64 _n, i64 m) {
         if (m == 0) return 1;
-        return lucas(n / mod, m / mod) * C(n % mod, m % mod) % mod;
+        return lucas(_n / mod, m / mod) * binom(_n % mod, m % mod) % mod;
     }
 
-    T catalan(int n) {
-        return ((C(n * 2, n) - C(n * 2, n - 1)) % mod + mod) % mod;
+    T catalan(int _n) {
+        return sub(binom(_n * 2, _n), binom(_n * 2, _n - 1));
     }
 
-    T catalan(int n, int m, int k) { //对于任意的i属于(n+m)时，n<=m+k,即n最多比m多k个的方案数
-        if (n > m + k) return 0;
-        return ((C(n + m, m) - C(n + m, m + k + 1)) % mod + mod) % mod;
+    T catalan(int _n, int m, int k) { //对于任意的i属于(_n+m)时，_n<=m+k,即n最多比m多k个的方案数
+        if (_n > m + k) return 0;
+        return sub(binom(_n + m, m), binom(_n + m, m + k + 1));
     }
 };

@@ -1,6 +1,6 @@
 std::vector<int> manacher(std::string s) {
     std::string t = " #";
-    for (auto c : s) {
+    for (auto c: s) {
         t += c;
         t += '#';
     }
@@ -18,4 +18,10 @@ std::vector<int> manacher(std::string s) {
         }
     }
     return r;
+}
+
+bool isPalindrome(std::vector<int> &R, int l, int r) {
+    int p = (l + (r - l + 1) / 2) * 2;
+    if ((r - l + 1) % 2 == 0) p--;
+    return R[p] >= (r - l + 1);
 }

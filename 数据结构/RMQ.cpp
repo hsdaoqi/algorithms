@@ -1,13 +1,13 @@
 template<class T>
-struct RMQ {
+struct SparseTable {
     int n;
     std::vector<T> a;
     std::vector<std::array<T, 30>> f;
     std::function<T(T, T)> func;
 
-    RMQ() {};
+    SparseTable() {};
 
-    RMQ(std::vector<T> init_, std::function<T(T, T)> func_) {
+    SparseTable(std::vector<T> init_, std::function<T(T, T)> func_) {
         work(init_, func_);
     }
 
